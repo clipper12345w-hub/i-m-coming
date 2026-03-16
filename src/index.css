@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lato:wght@300;400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --parchment: 40 60% 97.3%;
+    --parchment-dark: 37 38% 92.5%;
+    --surface: 0 0% 100%;
+    --ink: 36 50% 8.6%;
+    --ink-light: 30 50% 11.4%;
+    --gold: 43 52% 54.1%;
+    --gold-light: 40 52% 77.3%;
+    --gold-dim: 43 52% 54.1%;
+    --muted-warm: 30 11% 43.5%;
+    --divider: 37 30% 89.8%;
+    --dark: 30 58% 3.7%;
+
+    --background: var(--parchment);
+    --foreground: var(--ink);
+    --card: var(--surface);
+    --card-foreground: var(--ink);
+    --popover: var(--surface);
+    --popover-foreground: var(--ink);
+    --primary: var(--gold);
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--parchment-dark);
+    --secondary-foreground: var(--ink);
+    --muted: var(--parchment-dark);
+    --muted-foreground: var(--muted-warm);
+    --accent: var(--gold-dim);
+    --accent-foreground: var(--ink);
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--divider);
+    --input: var(--divider);
+    --ring: var(--gold);
+    --radius: 1rem;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Lato', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cormorant Garamond', serif;
+  }
+}
+
+/* Shimmer effect for verse */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.verse-shimmer {
+  background-image: linear-gradient(105deg, transparent 40%, rgba(201,168,76,0.3) 50%, transparent 60%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 4s infinite ease-in-out;
+}
+
+/* Parchment grain texture */
+.parchment-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Floating particles */
+@keyframes float-particle-1 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+@keyframes float-particle-2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(20px); } }
+@keyframes float-particle-3 { 0%,100% { transform: translateY(-10px); } 50% { transform: translateY(15px); } }
+
+/* Shine sweep for buttons */
+.shine-sweep {
+  position: relative;
+  overflow: hidden;
+}
+.shine-sweep::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: none;
+}
+.shine-sweep:hover::before {
+  animation: sweep 0.5s ease-in forwards;
+}
+@keyframes sweep {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* Nav link underline */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0%;
+  height: 1px;
+  background: hsl(var(--gold));
+  transition: width 300ms ease;
+}
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Scroll indicator bounce */
+@keyframes bounce-down {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+.bounce-down {
+  animation: bounce-down 1.5s infinite ease-in-out;
+}
+
+/* Orbit text animation */
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(160px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(160px) rotate(-360deg); }
+}
+
+/* Scan lines */
+.scan-lines {
+  background: repeating-linear-gradient(
+    transparent 0px,
+    transparent 3px,
+    rgba(255,255,255,0.01) 3px,
+    rgba(255,255,255,0.01) 4px
+  );
+}
+
+/* Pulse diamonds */
+@keyframes pulse-diamond {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* Gold glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
