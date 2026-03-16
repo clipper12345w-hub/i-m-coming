@@ -93,7 +93,7 @@ export default function Dashboard() {
     {
       label: 'Reading Streak',
       value: `${streak}`,
-      sub: streak > 0 ? 'days straight 🔥' : 'Start today!',
+      sub: streak > 0 ? 'days straight' : 'Start today!',
       progress: null,
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

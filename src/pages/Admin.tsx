@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminDevotionals from "@/components/admin/AdminDevotionals";

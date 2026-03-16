@@ -186,10 +186,30 @@ const AdminDashboard = () => {
             </div>
             <div className="p-3 flex flex-col gap-2">
               {[
-                { label: 'Add Devotional', section: 'devotionals', icon: '📖' },
-                { label: 'Add Product', section: 'products', icon: '🛍️' },
-                { label: 'Add Bible Day', section: 'bibleplan', icon: '📅' },
-                { label: 'Manage Users', section: 'users', icon: '👥' },
+                { label: 'Add Devotional', section: 'devotionals', icon: (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M4 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
+                    <path d="M11 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
+                  </svg>
+                )},
+                { label: 'Add Product', section: 'products', icon: (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M6 2h12l3 5H3l3-5z" />
+                    <rect x="3" y="7" width="18" height="14" rx="1" />
+                    <path d="M9 7v4a3 3 0 006 0V7" />
+                  </svg>
+                )},
+                { label: 'Add Bible Day', section: 'bibleplan', icon: (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <path d="M3 10h18M8 2v4M16 2v4" />
+                  </svg>
+                )},
+                { label: 'Manage Users', section: 'users', icon: (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 4-7 8-7s8 3 8 7" />
+                  </svg>
+                )},
               ].map((action) => (
                 <button
                   key={action.label}
@@ -199,7 +219,7 @@ const AdminDashboard = () => {
                   }}
                   className="px-4 py-3 rounded-xl text-left flex items-center gap-3 border border-white/[0.04] hover:border-[#C9A84C]/20 hover:bg-white/[0.03] transition-all group"
                 >
-                  <span className="text-lg">{action.icon}</span>
+                  <span className="text-[#7A6E62] group-hover:text-[#C9A84C] transition-colors">{action.icon}</span>
                   <span className="text-sm group-hover:text-[#C9A84C] transition-colors" style={{ color: '#FDFAF5', fontFamily: 'Lato, sans-serif' }}>{action.label}</span>
                 </button>
               ))}
