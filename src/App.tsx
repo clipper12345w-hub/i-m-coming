@@ -36,7 +36,7 @@ const App = () => (
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/bible-plan" element={<BiblePlan />} />
             <Route path="/shop" element={<Shop />} />
-            <Route path="/xk7m2-altar-9vq" element={<ProtectedRoute requireRole="admin"><Admin /></ProtectedRoute>} />
+            <Route path="/xk7m2-altar-9vq" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

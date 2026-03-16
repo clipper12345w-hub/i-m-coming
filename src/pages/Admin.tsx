@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminDevotionals from "@/components/admin/AdminDevotionals";
@@ -103,9 +104,15 @@ const sidebarGroups = [
 const allNavItems = sidebarGroups.flatMap(g => g.items);
 
 const Admin = () => {
-  const { user } = useAuth();
+  const { user, signInWithEmail, loading: authLoading } = useAuth();
   const [activeSection, setActiveSection] = useState("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [roleChecked, setRoleChecked] = useState(false);
+  const [hasRole, setHasRole] = useState(false);
 
   const handleNavigate = useCallback((e: Event) => {
     setActiveSection((e as CustomEvent).detail);
@@ -115,6 +122,30 @@ const Admin = () => {
     window.addEventListener('admin-navigate', handleNavigate);
     return () => window.removeEventListener('admin-navigate', handleNavigate);
   }, [handleNavigate]);
+
+  useEffect(() => {
+    if (!user) { setRoleChecked(true); setHasRole(false); return; }
+    const check = async () => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('role', 'admin' as any)
+        .maybeSingle();
+      setHasRole(!error && !!data);
+      setRoleChecked(true);
+    };
+    check();
+  }, [user]);
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError("");
+    setLoginLoading(true);
+    const { error } = await signInWithEmail(email, password);
+    if (error) setLoginError(error.message);
+    setLoginLoading(false);
+  };
 
   const renderSection = () => {
     switch (activeSection) {
@@ -128,6 +159,64 @@ const Admin = () => {
       default: return <AdminDashboard />;
     }
   };
+
+  if (authLoading || !roleChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0F0A04' }}>
+        <div className="w-6 h-6 border-2 border-t-[#C9A84C] border-white/10 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user || !hasRole) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0F0A04' }}>
+        <div className="w-full max-w-sm mx-4">
+          <div className="text-center mb-8">
+            <span className="font-serif text-2xl" style={{ color: '#C9A84C' }}>CrossAlliance</span>
+            <p className="font-sans text-xs uppercase tracking-[0.2em] mt-2" style={{ color: '#7A6E62' }}>Admin Access</p>
+          </div>
+          <form onSubmit={handleAdminLogin} className="rounded-2xl p-6 sm:p-8 border border-white/[0.08]" style={{ background: '#1A1209' }}>
+            <h2 className="font-serif text-xl mb-6 text-center" style={{ color: '#FDFAF5' }}>Sign In</h2>
+            {loginError && (
+              <div className="mb-4 p-3 rounded-lg text-xs text-center" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontFamily: 'Lato, sans-serif' }}>
+                {loginError}
+              </div>
+            )}
+            {user && !hasRole && (
+              <div className="mb-4 p-3 rounded-lg text-xs text-center" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontFamily: 'Lato, sans-serif' }}>
+                This account does not have admin privileges.
+              </div>
+            )}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.15em] mb-2" style={{ color: '#7A6E62', fontFamily: 'Lato, sans-serif' }}>Email</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#FDFAF5', fontFamily: 'Lato, sans-serif' }}
+                  placeholder="admin@example.com" />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.15em] mb-2" style={{ color: '#7A6E62', fontFamily: 'Lato, sans-serif' }}>Password</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+                  className="w-full px-4 py-3 rounded-lg text-sm outline-none" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#FDFAF5', fontFamily: 'Lato, sans-serif' }}
+                  placeholder="••••••••" />
+              </div>
+              <button type="submit" disabled={loginLoading}
+                className="w-full py-3 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
+                style={{ background: '#C9A84C', color: '#0F0A04', fontFamily: 'Lato, sans-serif' }}>
+                {loginLoading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </div>
+          </form>
+          <div className="text-center mt-6">
+            <Link to="/" className="text-xs hover:opacity-80 transition-opacity" style={{ color: '#7A6E62', fontFamily: 'Lato, sans-serif' }}>
+              ← Back to Site
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex" style={{ background: '#0F0A04' }}>

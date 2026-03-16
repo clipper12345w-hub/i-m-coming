@@ -93,7 +93,7 @@ export default function Dashboard() {
     {
       label: 'Reading Streak',
       value: `${streak}`,
-      sub: streak > 0 ? 'days straight 🔥' : 'Start today!',
+      sub: streak > 0 ? 'days straight' : 'Start today!',
       progress: null,
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -276,17 +276,37 @@ export default function Dashboard() {
           className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3"
         >
           {[
-            { label: 'Bible Plan', href: '/bible-plan', icon: '📖' },
-            { label: 'Prayer Room', href: '/prayer-room', icon: '🙏' },
-            { label: 'Devotional', href: '/devotional', icon: '✨' },
-            { label: 'Shop', href: '/shop', icon: '🛍️' },
+            { label: 'Bible Plan', href: '/bible-plan', icon: (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M4 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
+                <path d="M11 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
+              </svg>
+            )},
+            { label: 'Prayer Room', href: '/prayer-room', icon: (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M12 3C10 3 7 5 7 9c0 3 2 5 3 6l2 2 2-2c1-1 3-3 3-6 0-4-3-6-5-6z" />
+                <path d="M8 17l-3 4M16 17l3 4" />
+              </svg>
+            )},
+            { label: 'Devotional', href: '/devotional', icon: (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
+            )},
+            { label: 'Shop', href: '/shop', icon: (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M6 2h12l3 5H3l3-5z" />
+                <rect x="3" y="7" width="18" height="14" rx="1" />
+                <path d="M9 7v4a3 3 0 006 0V7" />
+              </svg>
+            )},
           ].map((link) => (
             <Link
               key={link.label}
               to={link.href}
-              className="bg-card rounded-xl p-4 border border-border hover:border-primary/30 hover:shadow-md transition-all duration-200 text-center group"
+              className="bg-card rounded-xl p-5 border border-border hover:border-primary/30 hover:shadow-md transition-all duration-200 text-center group"
             >
-              <span className="text-2xl block mb-2">{link.icon}</span>
+              <span className="block mb-3 text-primary/60 group-hover:text-primary transition-colors flex justify-center">{link.icon}</span>
               <span className="font-sans text-xs uppercase tracking-[0.15em] text-muted-foreground group-hover:text-primary transition-colors">{link.label}</span>
             </Link>
           ))}
