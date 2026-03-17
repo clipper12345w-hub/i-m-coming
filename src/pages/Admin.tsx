@@ -76,6 +76,16 @@ export default function Admin() {
     checkRole();
   }, [user, authLoading, navigate]);
 
+  
+  useEffect(() => {
+  const handler = (e: Event) => {
+    setActiveSection((e as CustomEvent).detail as Section);
+  };
+  window.addEventListener("admin-navigate", handler);
+  return () => window.removeEventListener("admin-navigate", handler);
+}, []);
+
+  
   const handleSignOut = async () => {
     await signOut();
     navigate("/");
