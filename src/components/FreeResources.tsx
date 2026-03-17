@@ -21,7 +21,7 @@ export default function FreeResources() {
 
   useEffect(() => {
     supabase
-      .from('products')
+      .from('products_public')
       .select('id, title, description, type, file_url, image_url')
       .eq('is_published', true)
       .eq('is_free', true)

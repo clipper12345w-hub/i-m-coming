@@ -28,7 +28,7 @@ export default function Shop() {
 
   useEffect(() => {
     supabase
-      .from('products')
+      .from('products_public')
       .select('*')
       .eq('is_published', true)
       .order('created_at', { ascending: false })
