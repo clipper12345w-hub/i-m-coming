@@ -45,9 +45,20 @@ export default function Shop() {
     ? products
     : products.filter(p => p.type === activeFilter);
 
-  const handleGetIt = (product: Product) => {
+  const handleGetIt = async (product: Product) => {
     if (product.is_free && product.file_url) {
-      window.open(product.file_url, '_blank');
+      try {
+        const { data, error } = await supabase.functions.invoke('get-product-file', {
+          body: { productId: product.id },
+        });
+        if (error || !data?.url) {
+          toast({ title: 'Error', description: 'Could not generate download link.', variant: 'destructive' });
+          return;
+        }
+        window.open(data.url, '_blank');
+      } catch {
+        toast({ title: 'Error', description: 'Could not download file.', variant: 'destructive' });
+      }
     } else if (!product.is_free && product.payhip_link) {
       window.open(product.payhip_link, '_blank');
     } else {
