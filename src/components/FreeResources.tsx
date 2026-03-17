@@ -129,7 +129,7 @@ export default function FreeResources() {
                 {resource.description}
               </p>
               <button
-                onClick={() => handleDownload(resource.file_url)}
+                onClick={() => handleDownload(resource)}
                 className="w-full py-3 font-sans text-xs uppercase tracking-[0.2em] text-white rounded-xl transition-colors duration-200"
                 style={{ background: '#C9A84C' }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#b8973f'; }}
