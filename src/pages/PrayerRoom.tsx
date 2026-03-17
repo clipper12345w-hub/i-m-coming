@@ -101,7 +101,7 @@ export default function PrayerRoom() {
     const init = async () => {
       const [prayerData, countRes] = await Promise.all([
         fetchPrayers(0),
-        supabase.from('prayer_requests').select('*', { count: 'exact', head: true }),
+        supabase.from('prayer_requests_public').select('*', { count: 'exact', head: true }),
       ]);
       setPrayers(prayerData);
       setTotalCount(countRes.count ?? 0);
