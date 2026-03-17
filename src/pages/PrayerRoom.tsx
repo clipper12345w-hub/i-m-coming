@@ -75,7 +75,7 @@ export default function PrayerRoom() {
 
   const fetchPrayers = useCallback(async (offset = 0) => {
     const { data, error } = await supabase
-      .from('prayer_requests')
+      .from('prayer_requests_public')
       .select('id, content, is_anonymous, prayer_count, created_at, user_id')
       .order('created_at', { ascending: false })
       .range(offset, offset + PAGE_SIZE - 1);
