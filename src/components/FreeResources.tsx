@@ -32,9 +32,20 @@ export default function FreeResources() {
       });
   }, []);
 
-  const handleDownload = (fileUrl: string | null) => {
-    if (fileUrl) {
-      window.open(fileUrl, '_blank');
+  const handleDownload = async (resource: FreeProduct) => {
+    if (resource.file_url) {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-product-file', {
+          body: { productId: resource.id },
+        });
+        if (error || !data?.url) {
+          toast({ title: 'Error', description: 'Could not generate download link.', variant: 'destructive' });
+          return;
+        }
+        window.open(data.url, '_blank');
+      } catch {
+        toast({ title: 'Error', description: 'Could not download file.', variant: 'destructive' });
+      }
     } else {
       toast({
         title: 'Coming soon',
