@@ -2,46 +2,151 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const struggleBible: Record<string, string[]> = {
-  Lust: ["1 Corinthians 6", "Matthew 5", "Job 31", "1 Thessalonians 4", "Romans 6", "Galatians 5", "Proverbs 6", "James 1", "Colossians 3", "Hebrews 13", "1 Peter 2", "Song of Solomon 2", "Psalm 119", "2 Timothy 2", "Philippians 4"],
-  Gluttony: ["Proverbs 23", "1 Corinthians 10", "Philippians 3", "Romans 13", "Luke 21", "Proverbs 25", "Daniel 1", "Matthew 6", "1 Corinthians 6", "Galatians 5", "Psalm 78", "Ecclesiastes 6", "Isaiah 55", "John 6", "Titus 1"],
-  Pride: ["Proverbs 16", "James 4", "1 Peter 5", "Philippians 2", "Isaiah 14", "Luke 14", "Romans 12", "Matthew 23", "Micah 6", "Daniel 4", "Psalm 10", "Obadiah 1", "Isaiah 2", "Luke 18", "Proverbs 11"],
-  Envy: ["Proverbs 14", "James 3", "Galatians 5", "1 Corinthians 13", "Romans 13", "Psalm 37", "Proverbs 23", "1 Peter 2", "Matthew 20", "Numbers 11", "Genesis 37", "Luke 15", "Philippians 4", "Hebrews 13", "Job 5"],
-  Sloth: ["Proverbs 6", "Colossians 3", "2 Thessalonians 3", "Ecclesiastes 9", "Romans 12", "Proverbs 12", "Matthew 25", "Hebrews 6", "1 Corinthians 15", "Proverbs 10", "Luke 19", "Galatians 6", "James 2", "Proverbs 18", "Nehemiah 4"],
-  Wrath: ["James 1", "Proverbs 15", "Ephesians 4", "Matthew 5", "Romans 12", "Colossians 3", "Proverbs 22", "Psalm 37", "1 Peter 3", "Luke 6", "Genesis 4", "Jonah 4", "Proverbs 19", "Matthew 18", "Hebrews 12"],
-  Greed: ["1 Timothy 6", "Luke 12", "Proverbs 11", "Ecclesiastes 5", "Matthew 6", "Hebrews 13", "Colossians 3", "Luke 16", "Proverbs 28", "Mark 10", "Exodus 20", "Psalm 49", "Acts 2", "2 Corinthians 9", "Malachi 3"],
-  Dishonesty: ["Proverbs 12", "Colossians 3", "Ephesians 4", "Psalm 15", "Zechariah 8", "Proverbs 19", "John 8", "Leviticus 19", "Luke 16", "Revelation 21", "Proverbs 6", "Acts 5", "Proverbs 11", "Romans 12", "Matthew 5"],
-  Gossip: ["Proverbs 11", "James 3", "Ephesians 4", "Proverbs 16", "1 Timothy 5", "Psalm 34", "Romans 1", "Leviticus 19", "Matthew 12", "Proverbs 20", "Titus 3", "2 Corinthians 12", "Proverbs 26", "Luke 6", "Colossians 4"],
-  "Lack of Gratitude": ["Psalm 100", "1 Thessalonians 5", "Philippians 4", "Colossians 3", "Luke 17", "Psalm 107", "Ephesians 5", "Romans 1", "Deuteronomy 8", "Psalm 136", "2 Corinthians 4", "Hebrews 12", "Psalm 103", "Jonah 2", "Daniel 6"],
-  Disobedience: ["Romans 13", "1 Samuel 15", "John 14", "Hebrews 13", "Proverbs 3", "Deuteronomy 11", "Acts 5", "James 1", "Matthew 7", "Luke 11", "1 Peter 1", "Exodus 20", "Isaiah 1", "Jeremiah 7", "Psalm 119"],
-  Judging: ["Matthew 7", "Romans 14", "James 4", "Luke 6", "John 8", "1 Corinthians 4", "Romans 2", "Colossians 2", "James 2", "Matthew 23", "Luke 18", "1 Samuel 16", "Galatians 6", "Romans 15", "Proverbs 31"],
-  Hypocrisy: ["Matthew 23", "Luke 12", "James 1", "Romans 2", "Isaiah 29", "Mark 7", "Titus 1", "1 John 1", "Matthew 6", "Luke 6", "2 Timothy 3", "Ezekiel 33", "Psalm 51", "Proverbs 20", "Matthew 15"],
+  Lust: [
+    "1 Corinthians 6", "Matthew 5", "Job 31", "1 Thessalonians 4",
+    "Romans 6", "Galatians 5", "Proverbs 6", "James 1", "Colossians 3",
+    "Hebrews 13", "1 Peter 2", "2 Timothy 2", "Philippians 4",
+    "Romans 8", "Ezekiel 16", "Song of Solomon 2", "Proverbs 7",
+    "1 John 2", "Romans 12", "Psalm 51"
+  ],
+  Gluttony: [
+    "Proverbs 23", "1 Corinthians 10", "Philippians 3", "Romans 13",
+    "Luke 21", "Proverbs 25", "Daniel 1", "Matthew 6", "1 Corinthians 6",
+    "Galatians 5", "Psalm 78", "Ecclesiastes 6", "Isaiah 55", "John 6",
+    "Titus 1", "Deuteronomy 8", "Proverbs 13", "Romans 14", "1 Timothy 4",
+    "Luke 12"
+  ],
+  Pride: [
+    "Proverbs 16", "James 4", "1 Peter 5", "Philippians 2", "Isaiah 14",
+    "Luke 14", "Romans 12", "Matthew 23", "Micah 6", "Daniel 4",
+    "Psalm 10", "Isaiah 2", "Luke 18", "Proverbs 11", "Obadiah 1",
+    "Jeremiah 9", "1 Corinthians 4", "Galatians 6", "Isaiah 66", "Psalm 131"
+  ],
+  Envy: [
+    "Proverbs 14", "James 3", "Galatians 5", "1 Corinthians 13", "Romans 13",
+    "Psalm 37", "Proverbs 23", "1 Peter 2", "Matthew 20", "Numbers 11",
+    "Genesis 37", "Luke 15", "Philippians 4", "Hebrews 13", "Job 5",
+    "Psalm 73", "Mark 7", "Titus 3", "1 Timothy 6", "Romans 12"
+  ],
+  Sloth: [
+    "Proverbs 6", "Colossians 3", "2 Thessalonians 3", "Ecclesiastes 9",
+    "Romans 12", "Proverbs 12", "Matthew 25", "Hebrews 6", "1 Corinthians 15",
+    "Proverbs 10", "Luke 19", "Galatians 6", "James 2", "Proverbs 18",
+    "Nehemiah 4", "John 9", "Ephesians 5", "1 Timothy 5", "Proverbs 24", "Psalm 90"
+  ],
+  Wrath: [
+    "James 1", "Proverbs 15", "Ephesians 4", "Matthew 5", "Romans 12",
+    "Colossians 3", "Proverbs 22", "Psalm 37", "1 Peter 3", "Luke 6",
+    "Genesis 4", "Jonah 4", "Proverbs 19", "Matthew 18", "Hebrews 12",
+    "Proverbs 29", "Ecclesiastes 7", "Romans 8", "2 Timothy 2", "Psalm 4"
+  ],
+  Greed: [
+    "1 Timothy 6", "Luke 12", "Proverbs 11", "Ecclesiastes 5", "Matthew 6",
+    "Hebrews 13", "Colossians 3", "Luke 16", "Proverbs 28", "Mark 10",
+    "Exodus 20", "Psalm 49", "Acts 2", "2 Corinthians 9", "Malachi 3",
+    "Matthew 19", "Proverbs 13", "Jeremiah 17", "Luke 18", "1 John 3"
+  ],
+  Dishonesty: [
+    "Proverbs 12", "Colossians 3", "Ephesians 4", "Psalm 15", "Zechariah 8",
+    "Proverbs 19", "John 8", "Leviticus 19", "Luke 16", "Revelation 21",
+    "Proverbs 6", "Acts 5", "Proverbs 11", "Romans 12", "Matthew 5",
+    "Proverbs 20", "Isaiah 33", "Psalm 119", "James 5", "Micah 6"
+  ],
+  Gossip: [
+    "Proverbs 11", "James 3", "Ephesians 4", "Proverbs 16", "1 Timothy 5",
+    "Psalm 34", "Romans 1", "Leviticus 19", "Matthew 12", "Proverbs 20",
+    "Titus 3", "2 Corinthians 12", "Proverbs 26", "Luke 6", "Colossians 4",
+    "Proverbs 18", "1 Peter 3", "Psalm 141", "Romans 14", "Matthew 18"
+  ],
+  "Lack of Gratitude": [
+    "Psalm 100", "1 Thessalonians 5", "Philippians 4", "Colossians 3", "Luke 17",
+    "Psalm 107", "Ephesians 5", "Romans 1", "Deuteronomy 8", "Psalm 136",
+    "2 Corinthians 4", "Hebrews 12", "Psalm 103", "Jonah 2", "Daniel 6",
+    "1 Chronicles 16", "Psalm 92", "Romans 8", "James 1", "Revelation 4"
+  ],
+  Disobedience: [
+    "Romans 13", "1 Samuel 15", "John 14", "Hebrews 13", "Proverbs 3",
+    "Deuteronomy 11", "Acts 5", "James 1", "Matthew 7", "Luke 11",
+    "1 Peter 1", "Exodus 20", "Isaiah 1", "Jeremiah 7", "Psalm 119",
+    "John 15", "Romans 6", "Hebrews 5", "1 John 5", "Ezekiel 36"
+  ],
+  Judging: [
+    "Matthew 7", "Romans 14", "James 4", "Luke 6", "John 8",
+    "1 Corinthians 4", "Romans 2", "Colossians 2", "James 2", "Matthew 23",
+    "Luke 18", "1 Samuel 16", "Galatians 6", "Romans 15", "Proverbs 31",
+    "John 7", "Matthew 18", "Romans 3", "1 Corinthians 13", "Micah 6"
+  ],
+  Hypocrisy: [
+    "Matthew 23", "Luke 12", "James 1", "Romans 2", "Isaiah 29",
+    "Mark 7", "Titus 1", "1 John 1", "Matthew 6", "Luke 6",
+    "2 Timothy 3", "Ezekiel 33", "Psalm 51", "Proverbs 20", "Matthew 15",
+    "Galatians 2", "1 Peter 2", "Romans 12", "Isaiah 58", "Amos 5"
+  ],
 };
 
 const struggleNames = Object.keys(struggleBible);
 const dayOptions = [7, 10, 15, 20, 25, 30];
 
-function generatePlan(days: number, struggles: string[]) {
-  const plan: { day: number; passage: string; struggle: string }[] = [];
-  const passageIndexes: Record<string, number> = {};
-  struggles.forEach(s => { passageIndexes[s] = 0; });
-  let poolIndex = 0;
+function getArcLabel(currentDay: number, totalDays: number) {
+  const progress = currentDay / totalDays;
+  if (progress <= 0.25) return 'Foundation';
+  if (progress <= 0.5) return 'Understanding';
+  if (progress <= 0.75) return 'Transformation';
+  return 'Victory';
+}
 
-  while (plan.length < days) {
-    const struggle = struggles[poolIndex % struggles.length];
-    const idx = passageIndexes[struggle];
-    if (idx < struggleBible[struggle].length) {
-      plan.push({ day: plan.length + 1, passage: struggleBible[struggle][idx], struggle });
-      passageIndexes[struggle]++;
+function generatePlan(days: number, struggles: string[]) {
+  const plan: { day: number; passage: string; struggle: string; arc: string }[] = [];
+
+  const passagesPerStruggle = Math.ceil(days / struggles.length);
+
+  const orderedPools: Record<string, string[]> = {};
+  struggles.forEach(struggle => {
+    const pool = struggleBible[struggle];
+    const needed = Math.min(passagesPerStruggle, pool.length);
+    orderedPools[struggle] = pool.slice(0, needed);
+  });
+
+  if (struggles.length === 1) {
+    const struggle = struggles[0];
+    const pool = struggleBible[struggle];
+    for (let i = 0; i < days; i++) {
+      plan.push({
+        day: i + 1,
+        passage: pool[i % pool.length],
+        struggle: struggle,
+        arc: getArcLabel(i + 1, days)
+      });
     }
-    poolIndex++;
-    if (plan.length < days && struggles.every(s => passageIndexes[s] >= struggleBible[s].length)) {
-      struggles.forEach(s => { passageIndexes[s] = 0; });
+  } else {
+    let dayCount = 0;
+    const passageIndexes: Record<string, number> = {};
+    struggles.forEach(s => { passageIndexes[s] = 0; });
+
+    while (dayCount < days) {
+      for (let s = 0; s < struggles.length && dayCount < days; s++) {
+        const struggle = struggles[s];
+        const pool = orderedPools[struggle];
+        for (let d = 0; d < 2 && dayCount < days; d++) {
+          const idx = passageIndexes[struggle] % pool.length;
+          plan.push({
+            day: dayCount + 1,
+            passage: pool[idx],
+            struggle: struggle,
+            arc: getArcLabel(dayCount + 1, days)
+          });
+          passageIndexes[struggle]++;
+          dayCount++;
+        }
+      }
     }
   }
+
   return plan;
 }
 
@@ -62,7 +167,8 @@ export default function BiblePlan() {
   // Tab 1 state
   const [selectedDays, setSelectedDays] = useState(7);
   const [selectedStruggles, setSelectedStruggles] = useState<string[]>([]);
-  const [generatedPlan, setGeneratedPlan] = useState<{ day: number; passage: string; struggle: string }[] | null>(null);
+  const [generatedPlan, setGeneratedPlan] = useState<{ day: number; passage: string; struggle: string; arc: string }[] | null>(null);
+  const [showWarning, setShowWarning] = useState(false);
 
   // Tab 2 state
   const planDay = getPlanDay();
@@ -77,10 +183,16 @@ export default function BiblePlan() {
   const toggleStruggle = (s: string) => {
     setSelectedStruggles(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
     setGeneratedPlan(null);
+    setShowWarning(false);
   };
 
   const handleGenerate = () => {
     if (selectedStruggles.length === 0) return;
+    if (selectedStruggles.length > Math.floor(selectedDays / 2)) {
+      setShowWarning(true);
+    } else {
+      setShowWarning(false);
+    }
     setGeneratedPlan(generatePlan(selectedDays, selectedStruggles));
   };
 
@@ -99,15 +211,12 @@ export default function BiblePlan() {
   useEffect(() => {
     if (!user || activeTab !== 'full') return;
 
-    // Total completed
     supabase.from('bible_plan_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
       .then(({ count }) => setCompletedDays(count ?? 0));
 
-    // Check if current selected day is completed
     supabase.from('bible_plan_progress').select('id').eq('user_id', user.id).eq('day_number', selectedWeekDay).maybeSingle()
       .then(({ data }) => setProgressId(data?.id ?? null));
 
-    // Week progress
     const today = new Date();
     const currentDayOfWeek = today.getDay();
     const weekDayNums = Array.from({ length: 7 }, (_, i) => {
@@ -149,6 +258,7 @@ export default function BiblePlan() {
       const dayNum = getPlanDay(d);
       return {
         label: weekDayLabels[i],
+        dateNum: d.getDate(),
         planDay: dayNum,
         isToday: i === currentDayOfWeek,
         isPast: i < currentDayOfWeek,
@@ -211,7 +321,7 @@ export default function BiblePlan() {
             {dayOptions.map(d => (
               <button
                 key={d}
-                onClick={() => { setSelectedDays(d); setGeneratedPlan(null); }}
+                onClick={() => { setSelectedDays(d); setGeneratedPlan(null); setShowWarning(false); }}
                 className="rounded-full px-6 py-2 font-sans text-sm cursor-pointer transition-all duration-200"
                 style={{
                   background: selectedDays === d ? '#C9A84C' : 'transparent',
@@ -267,6 +377,15 @@ export default function BiblePlan() {
             Generate My Reading Plan
           </button>
 
+          {/* Validation warning */}
+          {showWarning && (
+            <div className="mt-4 rounded-xl px-4 py-3" style={{ border: '1px solid rgba(201,168,76,0.4)', background: 'rgba(201,168,76,0.05)' }}>
+              <p className="font-sans text-sm" style={{ color: '#7A6E62', fontFamily: 'Lato, sans-serif' }}>
+                For the best spiritual journey, we recommend selecting at most {Math.floor(selectedDays / 2)} struggles for a {selectedDays}-day plan. You can still continue.
+              </p>
+            </div>
+          )}
+
           {/* Generated plan */}
           {generatedPlan && (
             <motion.div
@@ -285,11 +404,17 @@ export default function BiblePlan() {
 
               <div className="flex flex-col gap-3">
                 {generatedPlan.map(item => (
-                  <div key={item.day} className="bg-white rounded-xl px-6 py-4 flex items-center gap-6" style={{ border: '1px solid #EDE8DC' }}>
-                    <span className="font-serif text-2xl min-w-[60px]" style={{ color: '#C9A84C' }}>Day {item.day}</span>
-                    <div className="w-px h-8" style={{ background: '#EDE8DC' }} />
-                    <span className="font-sans text-base font-medium" style={{ color: '#1A1209' }}>{item.passage}</span>
-                    <span className="font-sans text-xs uppercase tracking-widest ml-auto opacity-60" style={{ color: '#7A6E62' }}>{item.struggle}</span>
+                  <div key={item.day} className="bg-white rounded-xl px-6 py-4 flex flex-col gap-1" style={{ border: '1px solid #EDE8DC' }}>
+                    <div className="flex items-center gap-4">
+                      <span className="font-serif text-2xl min-w-[60px]" style={{ color: '#C9A84C', fontFamily: 'Cormorant Garamond, serif' }}>Day {item.day}</span>
+                      <span className="font-sans uppercase tracking-widest px-2 py-0.5 rounded" style={{ fontSize: '9px', color: '#C9A84C', background: 'rgba(201,168,76,0.1)', fontFamily: 'Lato, sans-serif' }}>
+                        {item.arc}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <span className="font-sans text-base font-medium" style={{ color: '#1A1209', fontFamily: 'Lato, sans-serif' }}>{item.passage}</span>
+                      <span className="font-sans text-xs uppercase tracking-widest ml-auto" style={{ color: '#7A6E62', opacity: 0.6, fontFamily: 'Lato, sans-serif' }}>{item.struggle}</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -319,7 +444,9 @@ export default function BiblePlan() {
           {/* Today's reading */}
           <div className="bg-white rounded-2xl p-8 relative overflow-hidden mb-12" style={{ border: '1px solid #EDE8DC' }}>
             <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(to right, transparent, #C9A84C, transparent)' }} />
-            <span className="block font-sans text-xs uppercase tracking-[0.25em] mb-2" style={{ color: '#C9A84C' }}>Today's Reading</span>
+            <span className="block font-sans text-xs uppercase tracking-[0.25em] mb-2" style={{ color: '#C9A84C' }}>
+              {selectedWeekDay === planDay ? "Today's Reading" : "Day Reading"}
+            </span>
             <h2 className="font-serif font-light text-4xl mb-6" style={{ color: '#1A1209' }}>Day {selectedWeekDay} of 365</h2>
 
             {readingLoading ? (
@@ -380,24 +507,63 @@ export default function BiblePlan() {
           {/* Weekly overview */}
           <h3 className="font-serif font-light text-3xl mt-12 mb-8" style={{ color: '#1A1209' }}>This Week</h3>
           <div className="grid grid-cols-3 md:grid-cols-7 gap-3">
-            {weekData.map((wd, i) => (
-              <button
-                key={i}
-                onClick={() => setSelectedWeekDay(wd.planDay)}
-                className="rounded-xl p-3 text-center cursor-pointer transition-all duration-200"
-                style={{
-                  background: wd.isToday ? '#FDFAF5' : '#FFFFFF',
-                  border: `1px solid ${wd.isToday ? '#C9A84C' : '#EDE8DC'}`,
-                }}
-              >
-                <span className="block font-sans uppercase tracking-widest" style={{ fontSize: '10px', color: '#7A6E62' }}>{wd.label}</span>
-                <span className="block font-serif text-lg" style={{ color: '#1A1209' }}>{wd.planDay}</span>
-                <div
-                  className="w-2 h-2 rounded-full mx-auto mt-1"
-                  style={{ background: wd.isCompleted ? '#C9A84C' : wd.isToday ? '#1A1209' : '#EDE8DC' }}
-                />
-              </button>
-            ))}
+            {weekData.map((wd, i) => {
+              const isSelected = selectedWeekDay === wd.planDay && !wd.isToday;
+              const isTodayCard = wd.isToday;
+
+              return (
+                <button
+                  key={i}
+                  onClick={() => setSelectedWeekDay(wd.planDay)}
+                  className="rounded-xl p-3 text-center cursor-pointer transition-all duration-200 flex flex-col items-center"
+                  style={{
+                    background: isTodayCard ? '#1A1209' : '#FFFFFF',
+                    border: isSelected
+                      ? '1px solid #C9A84C'
+                      : isTodayCard
+                        ? '1px solid #1A1209'
+                        : '1px solid #EDE8DC',
+                  }}
+                >
+                  <span
+                    className="block font-sans uppercase tracking-widest"
+                    style={{
+                      fontSize: '10px',
+                      color: isTodayCard ? '#FFFFFF' : isSelected ? '#C9A84C' : '#7A6E62',
+                    }}
+                  >
+                    {wd.label}
+                  </span>
+                  <span
+                    className="block font-serif text-lg"
+                    style={{
+                      color: isTodayCard ? '#FFFFFF' : isSelected ? '#C9A84C' : '#1A1209',
+                    }}
+                  >
+                    {wd.planDay}
+                  </span>
+                  {isTodayCard && (
+                    <>
+                      <div className="w-2 h-2 rounded-full mx-auto mt-1" style={{ background: '#C9A84C' }} />
+                      <span className="block uppercase tracking-widest mt-1" style={{ fontSize: '9px', color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>
+                        TODAY
+                      </span>
+                    </>
+                  )}
+                  {isSelected && (
+                    <span className="block uppercase tracking-widest mt-1" style={{ fontSize: '9px', color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>
+                      VIEWING
+                    </span>
+                  )}
+                  {!isTodayCard && !isSelected && (
+                    <div
+                      className="w-2 h-2 rounded-full mx-auto mt-1"
+                      style={{ background: wd.isCompleted ? '#C9A84C' : '#EDE8DC' }}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </section>
       )}
