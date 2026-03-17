@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface BibleDay {
   id: string;
@@ -10,14 +16,22 @@ interface BibleDay {
   psalm: string | null;
 }
 
-const emptyForm = { day_number: '', old_testament: '', new_testament: '', psalm: '' };
+function getDayOfYear(d: Date) {
+  return Math.floor((d.getTime() - new Date(d.getFullYear(), 0, 0).getTime()) / 86400000);
+}
+
+function getPlanDayFromDate(d: Date) {
+  const dayOfYear = getDayOfYear(d);
+  return ((dayOfYear - 1) % 365) + 1;
+}
 
 const AdminBiblePlan = () => {
   const [days, setDays] = useState<BibleDay[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState({ day_number: '', old_testament: '', new_testament: '', psalm: '' });
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [saving, setSaving] = useState(false);
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
@@ -35,7 +49,12 @@ const AdminBiblePlan = () => {
     setLoading(false);
   };
 
-  const openAdd = () => { setEditing(null); setForm(emptyForm); setShowModal(true); };
+  const openAdd = () => {
+    setEditing(null);
+    setForm({ day_number: '', old_testament: '', new_testament: '', psalm: '' });
+    setSelectedDate(undefined);
+    setShowModal(true);
+  };
 
   const openEdit = (d: BibleDay) => {
     setEditing(d.id);
@@ -45,13 +64,37 @@ const AdminBiblePlan = () => {
       new_testament: d.new_testament || '',
       psalm: d.psalm || '',
     });
+    setSelectedDate(undefined);
     setShowModal(true);
+  };
+
+  // When date is picked, calculate day_number and prefill
+  const handleDateSelect = async (date: Date | undefined) => {
+    setSelectedDate(date);
+    if (!date) return;
+    const planDay = getPlanDayFromDate(date);
+    setForm(f => ({ ...f, day_number: planDay.toString() }));
+
+    // Try to load existing data for this day
+    const { data } = await supabase.from('bible_plan').select('*').eq('day_number', planDay).maybeSingle();
+    if (data) {
+      setEditing(data.id);
+      setForm({
+        day_number: planDay.toString(),
+        old_testament: data.old_testament || '',
+        new_testament: data.new_testament || '',
+        psalm: data.psalm || '',
+      });
+    } else {
+      setEditing(null);
+      setForm(f => ({ ...f, old_testament: '', new_testament: '', psalm: '' }));
+    }
   };
 
   const save = async () => {
     const dayNum = parseInt(form.day_number);
     if (!dayNum || dayNum < 1 || dayNum > 365) {
-      toast({ title: "Invalid day", description: "Day must be between 1 and 365.", variant: "destructive" }); return;
+      toast({ title: "Invalid day", description: "Please select a valid date.", variant: "destructive" }); return;
     }
     setSaving(true);
     const payload = {
@@ -147,9 +190,37 @@ const AdminBiblePlan = () => {
           <div className="rounded-2xl p-8 max-w-lg w-full mx-4 border border-white/[0.08] mb-8" style={{ background: '#1A1209' }}>
             <h2 className="font-serif text-2xl mb-6" style={{ color: '#FDFAF5' }}>{editing ? 'Edit Day' : 'Add Day'}</h2>
             <div className="flex flex-col gap-4">
+              {/* Date Picker */}
               <div>
-                <label className={labelClass} style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>Day Number</label>
-                <input className={inputClass} type="number" min={1} max={365} placeholder="1-365" value={form.day_number} onChange={e => setForm(f => ({ ...f, day_number: e.target.value }))} style={{ fontFamily: 'Lato, sans-serif' }} />
+                <label className={labelClass} style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>Select Date</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal bg-white/[0.06] border-white/10 hover:bg-white/10 text-white hover:text-white",
+                        !selectedDate && "text-white/30"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={handleDateSelect}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {form.day_number && (
+                  <p className="mt-2 text-xs" style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>
+                    This date = Day {form.day_number} of the Bible Plan
+                  </p>
+                )}
               </div>
               <div>
                 <label className={labelClass} style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>Old Testament</label>
@@ -165,7 +236,7 @@ const AdminBiblePlan = () => {
               </div>
             </div>
             <div className="flex gap-3 mt-6 sticky bottom-0 pt-4" style={{ background: '#1A1209' }}>
-              <button onClick={save} disabled={saving} className="flex-1 py-3 rounded-xl text-xs uppercase tracking-widest disabled:opacity-50 transition-colors hover:bg-[#b8973f]" style={{ background: '#C9A84C', color: '#0F0A04', fontFamily: 'Lato, sans-serif' }}>
+              <button onClick={save} disabled={saving || !form.day_number} className="flex-1 py-3 rounded-xl text-xs uppercase tracking-widest disabled:opacity-50 transition-colors hover:bg-[#b8973f]" style={{ background: '#C9A84C', color: '#0F0A04', fontFamily: 'Lato, sans-serif' }}>
                 {saving ? 'Saving...' : 'Save'}
               </button>
               <button onClick={() => setShowModal(false)} className="px-6 py-3 rounded-xl text-xs uppercase tracking-widest border border-white/10 transition-colors hover:bg-white/5" style={{ color: '#7A6E62', fontFamily: 'Lato, sans-serif' }}>Cancel</button>
