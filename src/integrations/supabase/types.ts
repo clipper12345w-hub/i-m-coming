@@ -181,7 +181,7 @@ export type Database = {
             foreignKeyName: "prayer_comments_prayer_request_id_fkey"
             columns: ["prayer_request_id"]
             isOneToOne: false
-            referencedRelation: "public_prayer_requests"
+            referencedRelation: "prayer_requests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -217,7 +217,7 @@ export type Database = {
             foreignKeyName: "prayer_reactions_prayer_request_id_fkey"
             columns: ["prayer_request_id"]
             isOneToOne: false
-            referencedRelation: "public_prayer_requests"
+            referencedRelation: "prayer_requests_public"
             referencedColumns: ["id"]
           },
         ]
@@ -415,12 +415,12 @@ export type Database = {
             foreignKeyName: "prayer_comments_prayer_request_id_fkey"
             columns: ["prayer_request_id"]
             isOneToOne: false
-            referencedRelation: "public_prayer_requests"
+            referencedRelation: "prayer_requests_public"
             referencedColumns: ["id"]
           },
         ]
       }
-      public_prayer_requests: {
+      prayer_requests_public: {
         Row: {
           content: string | null
           created_at: string | null
@@ -444,6 +444,51 @@ export type Database = {
           is_anonymous?: boolean | null
           prayer_count?: number | null
           user_id?: never
+        }
+        Relationships: []
+      }
+      products_public: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          file_url: string | null
+          id: string | null
+          image_url: string | null
+          is_featured: boolean | null
+          is_free: boolean | null
+          is_published: boolean | null
+          payhip_link: string | null
+          price_usd: number | null
+          title: string | null
+          type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          file_url?: never
+          id?: string | null
+          image_url?: string | null
+          is_featured?: boolean | null
+          is_free?: boolean | null
+          is_published?: boolean | null
+          payhip_link?: string | null
+          price_usd?: number | null
+          title?: string | null
+          type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          file_url?: never
+          id?: string | null
+          image_url?: string | null
+          is_featured?: boolean | null
+          is_free?: boolean | null
+          is_published?: boolean | null
+          payhip_link?: string | null
+          price_usd?: number | null
+          title?: string | null
+          type?: string | null
         }
         Relationships: []
       }
