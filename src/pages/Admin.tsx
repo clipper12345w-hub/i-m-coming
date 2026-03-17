@@ -2,6 +2,16 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import {
+  LayoutDashboard,
+  BookOpen,
+  ShoppingBag,
+  Heart,
+  CalendarDays,
+  Users,
+  Settings,
+  ArrowLeft,
+} from "lucide-react";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminDevotionals from "@/components/admin/AdminDevotionals";
 import AdminProducts from "@/components/admin/AdminProducts";
@@ -14,94 +24,36 @@ const sidebarGroups = [
   {
     label: "MAIN",
     items: [
-      {
-        key: "dashboard",
-        label: "Dashboard",
-        icon: (
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <rect x="1" y="1" width="7" height="7" rx="1" />
-            <rect x="10" y="1" width="7" height="7" rx="1" />
-            <rect x="1" y="10" width="7" height="7" rx="1" />
-            <rect x="10" y="10" width="7" height="7" rx="1" />
-          </svg>
-        ),
-      },
+      { key: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} strokeWidth={1.5} /> },
     ],
   },
   {
     label: "CONTENT",
     items: [
-      {
-        key: "devotionals",
-        label: "Devotionals",
-        icon: (
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M2 3c0-1 1-2 3-2s4 1 4 2v14c-1-1-3-2-4-2s-2 0-3 1V3z" />
-            <path d="M8 3c0-1 1-2 3-2s4 1 4 2v14c-1-1-3-2-4-2s-2 0-3 1V3z" />
-          </svg>
-        ),
-      },
-      {
-        key: "products",
-        label: "Products",
-        icon: (
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M4 1h10l3 4H1l3-4z" />
-            <rect x="2" y="5" width="14" height="12" rx="1" />
-            <path d="M7 5v4a2 2 0 004 0V5" />
-          </svg>
-        ),
-      },
-      {
-        key: "prayers",
-        label: "Prayer Requests",
-        icon: (
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M9 2C7 2 5 4 5 7c0 2 1 4 2 5l2 2 2-2c1-1 2-3 2-5 0-3-2-5-4-5z" />
-            <path d="M6 13l-2 3M12 13l2 3" />
-          </svg>
-        ),
-      },
-      {
-        key: "bibleplan",
-        label: "Bible Plan",
-        icon: (
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <rect x="2" y="3" width="14" height="14" rx="1" />
-            <path d="M2 7h14M6 1v4M12 1v4" />
-          </svg>
-        ),
-      },
+      { key: "devotionals", label: "Devotionals",      icon: <BookOpen    size={18} strokeWidth={1.5} /> },
+      { key: "products",    label: "Products",         icon: <ShoppingBag size={18} strokeWidth={1.5} /> },
+      { key: "prayers",     label: "Prayer Requests",  icon: <Heart       size={18} strokeWidth={1.5} /> },
+      { key: "bibleplan",   label: "Bible Plan",       icon: <CalendarDays size={18} strokeWidth={1.5} /> },
     ],
   },
   {
     label: "SYSTEM",
     items: [
-      {
-        key: "users",
-        label: "Users",
-        icon: (
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <circle cx="9" cy="6" r="3" />
-            <path d="M3 16c0-3 3-5 6-5s6 2 6 5" />
-          </svg>
-        ),
-      },
-      {
-        key: "settings",
-        label: "Settings",
-        icon: (
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <circle cx="9" cy="9" r="3" />
-            <path d="M9 1v2M9 15v2M1 9h2M15 9h2M3 3l1.5 1.5M13.5 13.5L15 15M3 15l1.5-1.5M13.5 4.5L15 3" />
-          </svg>
-        ),
-      },
+      { key: "users",    label: "Users",    icon: <Users    size={18} strokeWidth={1.5} /> },
+      { key: "settings", label: "Settings", icon: <Settings size={18} strokeWidth={1.5} /> },
     ],
   },
 ];
 
 const allNavItems = sidebarGroups.flatMap((g) => g.items);
+
+const bottomTabs = [
+  { key: "dashboard",   label: "Home",    icon: <LayoutDashboard size={22} strokeWidth={1.5} /> },
+  { key: "devotionals", label: "Devo",    icon: <BookOpen        size={22} strokeWidth={1.5} /> },
+  { key: "bibleplan",   label: "Bible",   icon: <CalendarDays    size={22} strokeWidth={1.5} /> },
+  { key: "prayers",     label: "Prayer",  icon: <Heart           size={22} strokeWidth={1.5} /> },
+  { key: "settings",    label: "Settings",icon: <Settings        size={22} strokeWidth={1.5} /> },
+];
 
 const Admin = () => {
   const { user, signInWithEmail, loading: authLoading } = useAuth();
@@ -169,17 +121,17 @@ const Admin = () => {
     );
   }
 
-  // Login form (not logged in OR logged in but no admin role)
+  // Login form
   if (!user || !hasRole) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0F0A04" }}>
-        <div className="w-full max-w-sm mx-4">
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#0F0A04" }}>
+        <div className="w-full max-w-sm">
           <div className="text-center mb-8">
             <span className="font-serif text-2xl" style={{ color: "#C9A84C" }}>CrossAlliance</span>
-            <p className="font-sans text-xs uppercase tracking-[0.2em] mt-2" style={{ color: "#7A6E62" }}>Admin Access</p>
+            <p className="text-xs uppercase tracking-[0.2em] mt-2" style={{ color: "#7A6E62", fontFamily: "Lato, sans-serif" }}>Admin Access</p>
           </div>
 
-          <form onSubmit={handleAdminLogin} className="rounded-2xl p-6 sm:p-8 border" style={{ background: "#1A1209", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <form onSubmit={handleAdminLogin} className="rounded-2xl p-6 border" style={{ background: "#1A1209", borderColor: "rgba(255,255,255,0.08)" }}>
             <h2 className="font-serif text-xl mb-6 text-center" style={{ color: "#FDFAF5" }}>Sign In</h2>
 
             {loginError && (
@@ -247,9 +199,9 @@ const Admin = () => {
 
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-[260px] border-r h-screen sticky top-0 overflow-y-auto" style={{ background: "#0A0703", borderColor: "rgba(255,255,255,0.08)" }}>
-        <div className="px-5 py-6 flex items-center gap-2">
+        <div className="px-5 py-6 flex items-center gap-3">
           <span className="font-serif text-xl" style={{ color: "#C9A84C" }}>CrossAlliance</span>
-          <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded ml-2 font-medium" style={{ background: "#C9A84C", color: "#0F0A04", fontFamily: "Lato, sans-serif" }}>Admin</span>
+          <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded font-medium" style={{ background: "#C9A84C", color: "#0F0A04", fontFamily: "Lato, sans-serif" }}>Admin</span>
         </div>
 
         <nav className="flex-1 px-3 mt-2 flex flex-col gap-0.5">
@@ -262,7 +214,7 @@ const Admin = () => {
                 <button
                   key={item.key}
                   onClick={() => setActiveSection(item.key)}
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg cursor-pointer text-sm transition-all duration-200 w-full text-left relative"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 w-full text-left relative"
                   style={{ fontFamily: "Lato, sans-serif" }}
                 >
                   {activeSection === item.key && (
@@ -276,10 +228,9 @@ const Admin = () => {
           ))}
         </nav>
 
-        <div className="px-4 pb-5 mt-auto">
-          <div className="h-px w-full mb-4" style={{ background: "rgba(255,255,255,0.06)" }} />
-          <div className="flex items-center gap-3 mb-3 px-1">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0" style={{ background: "#C9A84C", color: "#0F0A04" }}>
+        <div className="px-4 pb-5 mt-auto border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <div className="flex items-center gap-3 pt-4 px-1 mb-3">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: "#C9A84C", color: "#0F0A04" }}>
               {user?.user_metadata?.full_name?.[0] || user?.email?.[0]?.toUpperCase() || "A"}
             </div>
             <div className="min-w-0">
@@ -293,51 +244,45 @@ const Admin = () => {
           </div>
           <Link
             to="/"
-            className="flex items-center gap-2 text-xs px-1 py-3 mt-2 hover:text-white transition-colors duration-200"
+            className="flex items-center gap-2 text-xs px-1 py-2 hover:opacity-80 transition-opacity"
             style={{ color: "#7A6E62", fontFamily: "Lato, sans-serif" }}
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M10 7H4M4 7l3-3M4 7l3 3" />
-            </svg>
+            <ArrowLeft size={14} strokeWidth={1.5} />
             Back to Site
           </Link>
         </div>
       </aside>
 
       {/* Mobile Bottom Tab Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.08] flex justify-around px-1 py-2" style={{ background: "#0A0703" }}>
-        {allNavItems.slice(0, 5).map((item) => (
-          <button
-            key={item.key}
-            onClick={() => setActiveSection(item.key)}
-            className="flex flex-col items-center gap-0.5 p-2 rounded-lg text-[10px] transition-colors"
-            style={{ color: activeSection === item.key ? "#C9A84C" : "#7A6E62" }}
-          >
-            {item.icon}
-            <span style={{ fontFamily: "Lato, sans-serif" }}>{item.label.split(" ")[0]}</span>
-          </button>
-        ))}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="flex flex-col items-center gap-0.5 p-2 rounded-lg text-[10px] text-[#7A6E62]"
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <circle cx="4" cy="9" r="1.5" /><circle cx="9" cy="9" r="1.5" /><circle cx="14" cy="9" r="1.5" />
-          </svg>
-          <span style={{ fontFamily: "Lato, sans-serif" }}>More</span>
-        </button>
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.08]" style={{ background: "#0A0703" }}>
+        <div className="flex items-stretch h-16">
+          {bottomTabs.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setActiveSection(item.key)}
+              className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors"
+              style={{ color: activeSection === item.key ? "#C9A84C" : "#4A4035" }}
+            >
+              {item.icon}
+              <span className="text-[10px] font-medium" style={{ fontFamily: "Lato, sans-serif" }}>{item.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Mobile More Menu */}
+      {/* Mobile More Menu (Products & Users via drawer) */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-black/80 flex items-end" onClick={() => setMobileMenuOpen(false)}>
           <div className="w-full p-4 pb-20 rounded-t-2xl border-t border-white/[0.08]" style={{ background: "#1A1209" }} onClick={(e) => e.stopPropagation()}>
-            {allNavItems.slice(5).map((item) => (
+            {[
+              { key: "products", label: "Products",       icon: <ShoppingBag size={18} strokeWidth={1.5} /> },
+              { key: "users",    label: "Users",          icon: <Users       size={18} strokeWidth={1.5} /> },
+            ].map((item) => (
               <button
                 key={item.key}
                 onClick={() => { setActiveSection(item.key); setMobileMenuOpen(false); }}
-                className="flex items-center gap-3 px-5 py-3 rounded-xl w-full text-left text-sm mb-1"
-                style={{ background: activeSection === item.key ? "rgba(255,255,255,0.10)" : "transparent", color: activeSection === item.key ? "#C9A84C" : "#7A6E62", fontFamily: "Lato, sans-serif" }}
+                className="flex items-center gap-3 px-5 py-3 rounded-xl w-full text-left text-sm mb-1 transition-colors"
+                style={{ background: activeSection === item.key ? "rgba(201,168,76,0.08)" : "transparent", color: activeSection === item.key ? "#C9A84C" : "#7A6E62", fontFamily: "Lato, sans-serif" }}
               >
                 {item.icon}
                 {item.label}
@@ -345,12 +290,10 @@ const Admin = () => {
             ))}
             <Link
               to="/"
-              className="flex items-center gap-2 text-xs px-5 py-3 mt-2"
+              className="flex items-center gap-2 text-xs px-5 py-3 mt-1 hover:opacity-80 transition-opacity"
               style={{ color: "#7A6E62", fontFamily: "Lato, sans-serif" }}
             >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M10 7H4M4 7l3-3M4 7l3 3" />
-              </svg>
+              <ArrowLeft size={14} strokeWidth={1.5} />
               Back to Site
             </Link>
           </div>
