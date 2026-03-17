@@ -30,10 +30,10 @@ const sidebarGroups = [
   {
     label: "CONTENT",
     items: [
-      { key: "devotionals", label: "Devotionals",      icon: <BookOpen    size={18} strokeWidth={1.5} /> },
-      { key: "products",    label: "Products",         icon: <ShoppingBag size={18} strokeWidth={1.5} /> },
-      { key: "prayers",     label: "Prayer Requests",  icon: <Heart       size={18} strokeWidth={1.5} /> },
-      { key: "bibleplan",   label: "Bible Plan",       icon: <CalendarDays size={18} strokeWidth={1.5} /> },
+      { key: "devotionals", label: "Devotionals",     icon: <BookOpen     size={18} strokeWidth={1.5} /> },
+      { key: "products",    label: "Products",        icon: <ShoppingBag  size={18} strokeWidth={1.5} /> },
+      { key: "prayers",     label: "Prayer Requests", icon: <Heart        size={18} strokeWidth={1.5} /> },
+      { key: "bibleplan",   label: "Bible Plan",      icon: <CalendarDays size={18} strokeWidth={1.5} /> },
     ],
   },
   {
@@ -47,18 +47,20 @@ const sidebarGroups = [
 
 const allNavItems = sidebarGroups.flatMap((g) => g.items);
 
+// 7 tabs — icon only, no label to fit cleanly
 const bottomTabs = [
   { key: "dashboard",   label: "Home",    icon: <LayoutDashboard size={22} strokeWidth={1.5} /> },
   { key: "devotionals", label: "Devo",    icon: <BookOpen        size={22} strokeWidth={1.5} /> },
-  { key: "bibleplan",   label: "Bible",   icon: <CalendarDays    size={22} strokeWidth={1.5} /> },
+  { key: "products",    label: "Shop",    icon: <ShoppingBag     size={22} strokeWidth={1.5} /> },
   { key: "prayers",     label: "Prayer",  icon: <Heart           size={22} strokeWidth={1.5} /> },
-  { key: "settings",    label: "Settings",icon: <Settings        size={22} strokeWidth={1.5} /> },
+  { key: "bibleplan",   label: "Bible",   icon: <CalendarDays    size={22} strokeWidth={1.5} /> },
+  { key: "users",       label: "Users",   icon: <Users           size={22} strokeWidth={1.5} /> },
+  { key: "settings",    label: "More",    icon: <Settings        size={22} strokeWidth={1.5} /> },
 ];
 
 const Admin = () => {
   const { user, signInWithEmail, loading: authLoading } = useAuth();
   const [activeSection, setActiveSection] = useState("dashboard");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -139,7 +141,6 @@ const Admin = () => {
                 {loginError}
               </div>
             )}
-
             {user && !hasRole && (
               <div className="mb-4 p-3 rounded-lg text-xs text-center" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", fontFamily: "Lato, sans-serif" }}>
                 This account does not have admin privileges.
@@ -253,55 +254,36 @@ const Admin = () => {
         </div>
       </aside>
 
-      {/* Mobile Bottom Tab Bar */}
+      {/* Mobile Bottom Tab Bar — icon only, 7 tabs */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.08]" style={{ background: "#0A0703" }}>
-        <div className="flex items-stretch h-16">
+        <div className="flex items-stretch h-14">
           {bottomTabs.map((item) => (
             <button
               key={item.key}
               onClick={() => setActiveSection(item.key)}
-              className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors"
+              className="flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors"
               style={{ color: activeSection === item.key ? "#C9A84C" : "#4A4035" }}
             >
               {item.icon}
-              <span className="text-[10px] font-medium" style={{ fontFamily: "Lato, sans-serif" }}>{item.label}</span>
+              <span className="text-[9px] font-medium leading-none" style={{ fontFamily: "Lato, sans-serif" }}>{item.label}</span>
             </button>
           ))}
         </div>
+        {/* Back to Site — di bawah tab bar, hanya mobile */}
+        <div className="border-t border-white/[0.04] px-4 py-2 flex justify-center">
+          <Link
+            to="/"
+            className="flex items-center gap-1.5 text-[10px] hover:opacity-80 transition-opacity"
+            style={{ color: "#4A4035", fontFamily: "Lato, sans-serif" }}
+          >
+            <ArrowLeft size={12} strokeWidth={1.5} />
+            Back to Site
+          </Link>
+        </div>
       </div>
 
-      {/* Mobile More Menu (Products & Users via drawer) */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/80 flex items-end" onClick={() => setMobileMenuOpen(false)}>
-          <div className="w-full p-4 pb-20 rounded-t-2xl border-t border-white/[0.08]" style={{ background: "#1A1209" }} onClick={(e) => e.stopPropagation()}>
-            {[
-              { key: "products", label: "Products",       icon: <ShoppingBag size={18} strokeWidth={1.5} /> },
-              { key: "users",    label: "Users",          icon: <Users       size={18} strokeWidth={1.5} /> },
-            ].map((item) => (
-              <button
-                key={item.key}
-                onClick={() => { setActiveSection(item.key); setMobileMenuOpen(false); }}
-                className="flex items-center gap-3 px-5 py-3 rounded-xl w-full text-left text-sm mb-1 transition-colors"
-                style={{ background: activeSection === item.key ? "rgba(201,168,76,0.08)" : "transparent", color: activeSection === item.key ? "#C9A84C" : "#7A6E62", fontFamily: "Lato, sans-serif" }}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-xs px-5 py-3 mt-1 hover:opacity-80 transition-opacity"
-              style={{ color: "#7A6E62", fontFamily: "Lato, sans-serif" }}
-            >
-              <ArrowLeft size={14} strokeWidth={1.5} />
-              Back to Site
-            </Link>
-          </div>
-        </div>
-      )}
-
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-28 md:pb-8">
         {renderSection()}
       </main>
 
