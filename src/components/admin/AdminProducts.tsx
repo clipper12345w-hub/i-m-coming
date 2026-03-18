@@ -188,7 +188,11 @@ const AdminProducts = () => {
                 </select>
               </div>
               <div>
-                <label className={labelClass} style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>Price USD</label>
+                <label className={labelClass} style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>Original Price USD (before discount)</label>
+                <input className={inputClass} type="number" step="0.01" placeholder="Leave empty if no discount" value={form.original_price_usd} onChange={e => setForm(f => ({ ...f, original_price_usd: e.target.value }))} style={{ fontFamily: 'Lato, sans-serif' }} />
+              </div>
+              <div>
+                <label className={labelClass} style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>Sale Price USD</label>
                 <input className={inputClass} type="number" step="0.01" placeholder="Leave empty if free" value={form.price_usd} onChange={e => setForm(f => ({ ...f, price_usd: e.target.value }))} style={{ fontFamily: 'Lato, sans-serif' }} />
               </div>
               <div>

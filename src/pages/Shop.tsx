@@ -172,9 +172,29 @@ export default function Shop() {
                     <h3 className="font-serif text-xl font-semibold mb-2" style={{ color: '#1A1209' }}>{product.title}</h3>
                     <p className="font-sans text-sm leading-relaxed mb-4 line-clamp-2" style={{ color: '#7A6E62' }}>{product.description}</p>
                     <div className="flex justify-between items-center">
-                      <span className="font-serif text-2xl" style={{ color: '#C9A84C' }}>
-                        {product.is_free ? 'Free' : product.price_usd ? `$${product.price_usd.toFixed(2)}` : 'Free'}
-                      </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {product.is_free ? (
+                          <span className="font-serif text-2xl" style={{ color: '#C9A84C' }}>Free</span>
+                        ) : product.price_usd ? (
+                          <>
+                            {product.original_price_usd && product.original_price_usd > product.price_usd && (
+                              <>
+                                <span className="font-sans text-sm line-through" style={{ color: '#7A6E62' }}>
+                                  ${product.original_price_usd.toFixed(2)}
+                                </span>
+                                <span className="font-sans text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: '#C9A84C', color: '#FFFFFF' }}>
+                                  {Math.round(((product.original_price_usd - product.price_usd) / product.original_price_usd) * 100)}% OFF
+                                </span>
+                              </>
+                            )}
+                            <span className="font-serif text-2xl" style={{ color: '#C9A84C' }}>
+                              ${product.price_usd.toFixed(2)}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="font-serif text-2xl" style={{ color: '#C9A84C' }}>Free</span>
+                        )}
+                      </div>
                       <button
                         onClick={() => handleGetIt(product)}
                         className="px-5 py-2 font-sans text-xs uppercase tracking-widest transition-all duration-200"
