@@ -165,7 +165,7 @@ export default function Shop() {
                       className="absolute top-3 left-3 font-sans text-xs uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-sm"
                       style={{ background: 'rgba(15,10,4,0.75)', color: '#E8D5A3' }}
                     >
-                      {product.type}
+                      {formatType(product.type)}
                     </span>
                   </div>
 
