@@ -12,11 +12,14 @@ interface Product {
   description: string | null;
   type: string;
   price_usd: number | null;
+  original_price_usd: number | null;
   payhip_link: string | null;
   image_url: string | null;
   is_free: boolean | null;
   file_url: string | null;
 }
+
+const formatType = (type: string) => type.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
 export default function Shop() {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -162,7 +165,7 @@ export default function Shop() {
                       className="absolute top-3 left-3 font-sans text-xs uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-sm"
                       style={{ background: 'rgba(15,10,4,0.75)', color: '#E8D5A3' }}
                     >
-                      {product.type}
+                      {formatType(product.type)}
                     </span>
                   </div>
 
@@ -171,9 +174,29 @@ export default function Shop() {
                     <h3 className="font-serif text-xl font-semibold mb-2" style={{ color: '#1A1209' }}>{product.title}</h3>
                     <p className="font-sans text-sm leading-relaxed mb-4 line-clamp-2" style={{ color: '#7A6E62' }}>{product.description}</p>
                     <div className="flex justify-between items-center">
-                      <span className="font-serif text-2xl" style={{ color: '#C9A84C' }}>
-                        {product.is_free ? 'Free' : product.price_usd ? `$${product.price_usd.toFixed(2)}` : 'Free'}
-                      </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {product.is_free ? (
+                          <span className="font-serif text-2xl" style={{ color: '#C9A84C' }}>Free</span>
+                        ) : product.price_usd ? (
+                          <>
+                            {product.original_price_usd && product.original_price_usd > product.price_usd && (
+                              <>
+                                <span className="font-sans text-sm line-through" style={{ color: '#7A6E62' }}>
+                                  ${product.original_price_usd.toFixed(2)}
+                                </span>
+                                <span className="font-sans text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: '#C9A84C', color: '#FFFFFF' }}>
+                                  {Math.round(((product.original_price_usd - product.price_usd) / product.original_price_usd) * 100)}% OFF
+                                </span>
+                              </>
+                            )}
+                            <span className="font-serif text-2xl" style={{ color: '#C9A84C' }}>
+                              ${product.price_usd.toFixed(2)}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="font-serif text-2xl" style={{ color: '#C9A84C' }}>Free</span>
+                        )}
+                      </div>
                       <button
                         onClick={() => handleGetIt(product)}
                         className="px-5 py-2 font-sans text-xs uppercase tracking-widest transition-all duration-200"

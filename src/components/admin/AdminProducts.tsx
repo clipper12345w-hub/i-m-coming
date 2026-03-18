@@ -8,6 +8,7 @@ interface Product {
   description: string | null;
   type: string;
   price_usd: number | null;
+  original_price_usd: number | null;
   payhip_link: string | null;
   image_url: string | null;
   file_url: string | null;
@@ -17,8 +18,8 @@ interface Product {
 }
 
 const emptyForm = {
-  title: '', description: '', type: 'ebook', price_usd: '', payhip_link: '',
-  image_url: '', file_url: '', is_free: false, is_published: true, is_featured: false,
+  title: '', description: '', type: 'ebook', price_usd: '', original_price_usd: '',
+  payhip_link: '', image_url: '', file_url: '', is_free: false, is_published: true, is_featured: false,
 };
 
 const AdminProducts = () => {
@@ -45,7 +46,8 @@ const AdminProducts = () => {
     setEditing(p.id);
     setForm({
       title: p.title, description: p.description || '', type: p.type,
-      price_usd: p.price_usd?.toString() || '', payhip_link: p.payhip_link || '',
+      price_usd: p.price_usd?.toString() || '', original_price_usd: (p as any).original_price_usd?.toString() || '',
+      payhip_link: p.payhip_link || '',
       image_url: p.image_url || '', file_url: p.file_url || '',
       is_free: p.is_free || false, is_published: p.is_published !== false,
       is_featured: p.is_featured || false,
@@ -75,6 +77,7 @@ const AdminProducts = () => {
     const payload = {
       title: form.title, description: form.description || null, type: form.type,
       price_usd: form.price_usd ? parseFloat(form.price_usd) : null,
+      original_price_usd: form.original_price_usd ? parseFloat(form.original_price_usd) : null,
       payhip_link: form.payhip_link || null, image_url: form.image_url || null,
       file_url: form.file_url || null, is_free: form.is_free,
       is_published: form.is_published, is_featured: form.is_featured,
@@ -178,11 +181,18 @@ const AdminProducts = () => {
                 <label className={labelClass} style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>Type</label>
                 <select className={inputClass} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} style={{ fontFamily: 'Lato, sans-serif' }}>
                   <option value="ebook">Ebook</option>
+                  <option value="ebook-bundle">Ebook Bundle</option>
                   <option value="wallpaper">Wallpaper</option>
+                  <option value="wallpaper-bundle">Wallpaper Bundle</option>
+                  <option value="mixed-bundle">Mixed Bundle (Ebook + Wallpaper)</option>
                 </select>
               </div>
               <div>
-                <label className={labelClass} style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>Price USD</label>
+                <label className={labelClass} style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>Original Price USD (before discount)</label>
+                <input className={inputClass} type="number" step="0.01" placeholder="Leave empty if no discount" value={form.original_price_usd} onChange={e => setForm(f => ({ ...f, original_price_usd: e.target.value }))} style={{ fontFamily: 'Lato, sans-serif' }} />
+              </div>
+              <div>
+                <label className={labelClass} style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>Sale Price USD</label>
                 <input className={inputClass} type="number" step="0.01" placeholder="Leave empty if free" value={form.price_usd} onChange={e => setForm(f => ({ ...f, price_usd: e.target.value }))} style={{ fontFamily: 'Lato, sans-serif' }} />
               </div>
               <div>
