@@ -8,6 +8,7 @@ interface Product {
   description: string | null;
   type: string;
   price_usd: number | null;
+  original_price_usd: number | null;
   payhip_link: string | null;
   image_url: string | null;
   file_url: string | null;
@@ -17,8 +18,8 @@ interface Product {
 }
 
 const emptyForm = {
-  title: '', description: '', type: 'ebook', price_usd: '', payhip_link: '',
-  image_url: '', file_url: '', is_free: false, is_published: true, is_featured: false,
+  title: '', description: '', type: 'ebook', price_usd: '', original_price_usd: '',
+  payhip_link: '', image_url: '', file_url: '', is_free: false, is_published: true, is_featured: false,
 };
 
 const AdminProducts = () => {
