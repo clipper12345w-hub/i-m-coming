@@ -135,17 +135,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Extract storage path from the full URL
-    const url = new URL(product.file_url);
-    const pathMatch = url.pathname.match(/\/storage\/v1\/object\/public\/products\/(.+)/);
-    if (!pathMatch) {
-      return new Response(JSON.stringify({ error: "Invalid file path" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Determine storage path — handle both full URLs and plain paths
+    let filePath: string;
+    if (product.file_url.startsWith('http')) {
+      const url = new URL(product.file_url);
+      const pathMatch = url.pathname.match(/\/storage\/v1\/object\/public\/products\/(.+)/);
+      if (!pathMatch) {
+        return new Response(JSON.stringify({ error: "Invalid file path" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      filePath = decodeURIComponent(pathMatch[1]);
+    } else {
+      // Plain storage path (new format)
+      filePath = product.file_url;
     }
-
-    const filePath = decodeURIComponent(pathMatch[1]);
 
     // Generate a short-lived signed URL (5 minutes)
     const { data: signedData, error: signErr } = await supabaseAdmin.storage
