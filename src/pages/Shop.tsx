@@ -63,7 +63,8 @@ export default function Shop() {
         toast({ title: 'Error', description: 'Could not download file.', variant: 'destructive' });
       }
     } else if (!product.is_free && product.payhip_link) {
-      window.open(product.payhip_link, '_blank');
+      const safeUrl = product.payhip_link.startsWith('http') ? product.payhip_link : `https://${product.payhip_link}`;
+      window.open(safeUrl, '_blank');
     } else {
       toast({ title: 'Coming soon!', description: 'This resource will be available shortly.' });
     }

@@ -74,11 +74,17 @@ const AdminProducts = () => {
       }
     }
     setSaving(true);
+    // Sanitize URLs: prepend https:// if missing
+    const sanitizeUrl = (url: string | null) => {
+      if (!url) return null;
+      if (url.startsWith('http://') || url.startsWith('https://')) return url;
+      return `https://${url}`;
+    };
     const payload = {
       title: form.title, description: form.description || null, type: form.type,
       price_usd: form.price_usd ? parseFloat(form.price_usd) : null,
       original_price_usd: form.original_price_usd ? parseFloat(form.original_price_usd) : null,
-      payhip_link: form.payhip_link || null, image_url: form.image_url || null,
+      payhip_link: sanitizeUrl(form.payhip_link), image_url: form.image_url || null,
       file_url: form.file_url || null, is_free: form.is_free,
       is_published: form.is_published, is_featured: form.is_featured,
     };
