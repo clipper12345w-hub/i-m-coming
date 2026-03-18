@@ -12,6 +12,7 @@ interface Product {
   description: string | null;
   type: string;
   price_usd: number | null;
+  original_price_usd: number | null;
   payhip_link: string | null;
   image_url: string | null;
   is_free: boolean | null;
