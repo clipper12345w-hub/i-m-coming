@@ -46,7 +46,8 @@ const AdminProducts = () => {
     setEditing(p.id);
     setForm({
       title: p.title, description: p.description || '', type: p.type,
-      price_usd: p.price_usd?.toString() || '', payhip_link: p.payhip_link || '',
+      price_usd: p.price_usd?.toString() || '', original_price_usd: (p as any).original_price_usd?.toString() || '',
+      payhip_link: p.payhip_link || '',
       image_url: p.image_url || '', file_url: p.file_url || '',
       is_free: p.is_free || false, is_published: p.is_published !== false,
       is_featured: p.is_featured || false,
