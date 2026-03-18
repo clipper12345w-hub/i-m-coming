@@ -181,7 +181,10 @@ const AdminProducts = () => {
                 <label className={labelClass} style={{ color: '#C9A84C', fontFamily: 'Lato, sans-serif' }}>Type</label>
                 <select className={inputClass} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} style={{ fontFamily: 'Lato, sans-serif' }}>
                   <option value="ebook">Ebook</option>
+                  <option value="ebook-bundle">Ebook Bundle</option>
                   <option value="wallpaper">Wallpaper</option>
+                  <option value="wallpaper-bundle">Wallpaper Bundle</option>
+                  <option value="mixed-bundle">Mixed Bundle (Ebook + Wallpaper)</option>
                 </select>
               </div>
               <div>
