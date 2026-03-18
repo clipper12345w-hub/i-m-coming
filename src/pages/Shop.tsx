@@ -19,6 +19,8 @@ interface Product {
   file_url: string | null;
 }
 
+const formatType = (type: string) => type.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
 export default function Shop() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [products, setProducts] = useState<Product[]>([]);
