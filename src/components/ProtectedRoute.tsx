@@ -10,13 +10,14 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
-  const [roleChecked, setRoleChecked] = useState(false);
+  const [roleChecked, setRoleChecked] = useState(!requireRole);
   const [hasRole, setHasRole] = useState(false);
 
   useEffect(() => {
-    if (loading) return;
-    if (!requireRole) { setRoleChecked(true); return; }
-    if (!user) { setRoleChecked(true); return; }
+    if (!requireRole || !user) {
+      setRoleChecked(true);
+      return;
+    }
 
     const checkRole = async () => {
       const { data, error } = await supabase
@@ -30,9 +31,8 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
     };
 
     checkRole();
-  }, [user, loading, requireRole]);
+  }, [user, requireRole]);
 
-  // Show nothing while loading OR while checking role — NO error message shown
   if (loading || !roleChecked) return null;
   if (!user) return <Navigate to="/login" replace />;
   if (requireRole && !hasRole) return <Navigate to="/" replace />;
