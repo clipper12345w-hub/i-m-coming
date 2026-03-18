@@ -14,22 +14,10 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
   const [hasRole, setHasRole] = useState(false);
 
   useEffect(() => {
-    // Wait until auth is fully resolved
     if (loading) return;
+    if (!requireRole) { setRoleChecked(true); return; }
+    if (!user) { setRoleChecked(true); return; }
 
-    // No role required — just need to be logged in
-    if (!requireRole) {
-      setRoleChecked(true);
-      return;
-    }
-
-    // Role required but no user — mark as checked (will redirect to login)
-    if (!user) {
-      setRoleChecked(true);
-      return;
-    }
-
-    // User exists and role required — run query
     const checkRole = async () => {
       const { data, error } = await supabase
         .from('user_roles')
@@ -44,13 +32,9 @@ const ProtectedRoute = ({ children, requireRole }: ProtectedRouteProps) => {
     checkRole();
   }, [user, loading, requireRole]);
 
-  // Still loading auth or role check pending — show nothing
+  // Show nothing while loading OR while checking role — NO error message shown
   if (loading || !roleChecked) return null;
-
-  // Not logged in
   if (!user) return <Navigate to="/login" replace />;
-
-  // Logged in but no required role
   if (requireRole && !hasRole) return <Navigate to="/" replace />;
 
   return <>{children}</>;
