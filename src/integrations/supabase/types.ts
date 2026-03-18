@@ -259,6 +259,7 @@ export type Database = {
           is_featured: boolean | null
           is_free: boolean | null
           is_published: boolean | null
+          original_price_usd: number | null
           payhip_link: string | null
           price_usd: number | null
           title: string
@@ -273,6 +274,7 @@ export type Database = {
           is_featured?: boolean | null
           is_free?: boolean | null
           is_published?: boolean | null
+          original_price_usd?: number | null
           payhip_link?: string | null
           price_usd?: number | null
           title: string
@@ -287,6 +289,7 @@ export type Database = {
           is_featured?: boolean | null
           is_free?: boolean | null
           is_published?: boolean | null
+          original_price_usd?: number | null
           payhip_link?: string | null
           price_usd?: number | null
           title?: string
@@ -457,6 +460,7 @@ export type Database = {
           is_featured: boolean | null
           is_free: boolean | null
           is_published: boolean | null
+          original_price_usd: number | null
           payhip_link: string | null
           price_usd: number | null
           title: string | null
@@ -471,6 +475,7 @@ export type Database = {
           is_featured?: boolean | null
           is_free?: boolean | null
           is_published?: boolean | null
+          original_price_usd?: number | null
           payhip_link?: string | null
           price_usd?: number | null
           title?: string | null
@@ -485,6 +490,7 @@ export type Database = {
           is_featured?: boolean | null
           is_free?: boolean | null
           is_published?: boolean | null
+          original_price_usd?: number | null
           payhip_link?: string | null
           price_usd?: number | null
           title?: string | null
