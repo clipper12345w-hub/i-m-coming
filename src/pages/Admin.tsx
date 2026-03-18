@@ -140,7 +140,7 @@ const Admin = () => {
   }
 
   // Login form
-  if (!user || !hasRole) {
+  if (!user || !hasRole || !adminAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#0F0A04" }}>
         <div className="w-full max-w-sm">
