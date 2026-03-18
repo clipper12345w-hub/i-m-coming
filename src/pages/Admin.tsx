@@ -70,9 +70,14 @@ const Admin = () => {
   // Always require fresh login — never use remembered session
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
 
+  // Sign out any existing session on mount to force fresh login
   useEffect(() => {
-    // Reset admin session state on mount without signing out
-    setAdminAuthenticated(false);
+    const forceLogout = async () => {
+      await signOut();
+      setAdminAuthenticated(false);
+    };
+    forceLogout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleNavigate = useCallback((e: Event) => {
