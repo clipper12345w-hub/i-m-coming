@@ -55,12 +55,20 @@ const AdminProducts = () => {
     setShowModal(true);
   };
 
+  // Upload images to public 'product-images' bucket, files to private 'products' bucket
   const uploadFile = async (file: File, prefix: string) => {
+    const isImage = prefix === 'images';
+    const bucket = isImage ? 'product-images' : 'products';
     const path = `${prefix}/${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from('products').upload(path, file);
+    const { error } = await supabase.storage.from(bucket).upload(path, file);
     if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); return null; }
-    const { data } = supabase.storage.from('products').getPublicUrl(path);
-    return data.publicUrl;
+    if (isImage) {
+      // Public bucket — return public URL for display
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      return data.publicUrl;
+    }
+    // Private bucket — store only the path; files served via edge function
+    return path;
   };
 
   const save = async () => {
