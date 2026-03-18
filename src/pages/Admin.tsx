@@ -59,7 +59,7 @@ const bottomTabs = [
 ];
 
 const Admin = () => {
-  const { user, signInWithEmail, loading: authLoading } = useAuth();
+  const { user, signInWithEmail, loading: authLoading, signOut } = useAuth();
   const [activeSection, setActiveSection] = useState("dashboard");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,6 +67,18 @@ const Admin = () => {
   const [loginLoading, setLoginLoading] = useState(false);
   const [roleChecked, setRoleChecked] = useState(false);
   const [hasRole, setHasRole] = useState(false);
+  // Always require fresh login — never use remembered session
+  const [adminAuthenticated, setAdminAuthenticated] = useState(false);
+
+  // Sign out any existing session on mount to force fresh login
+  useEffect(() => {
+    const forceLogout = async () => {
+      await signOut();
+      setAdminAuthenticated(false);
+    };
+    forceLogout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleNavigate = useCallback((e: Event) => {
     setActiveSection((e as CustomEvent).detail);
@@ -78,7 +90,7 @@ const Admin = () => {
   }, [handleNavigate]);
 
   useEffect(() => {
-    if (!user) { setRoleChecked(true); setHasRole(false); return; }
+    if (!user || !adminAuthenticated) { setRoleChecked(true); setHasRole(false); return; }
     const check = async () => {
       const { data, error } = await supabase
         .from("user_roles")
@@ -90,14 +102,18 @@ const Admin = () => {
       setRoleChecked(true);
     };
     check();
-  }, [user]);
+  }, [user, adminAuthenticated]);
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
     setLoginLoading(true);
     const { error } = await signInWithEmail(email, password);
-    if (error) setLoginError(error.message);
+    if (error) {
+      setLoginError(error.message);
+    } else {
+      setAdminAuthenticated(true);
+    }
     setLoginLoading(false);
   };
 
@@ -124,7 +140,7 @@ const Admin = () => {
   }
 
   // Login form
-  if (!user || !hasRole) {
+  if (!user || !hasRole || !adminAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#0F0A04" }}>
         <div className="w-full max-w-sm">
