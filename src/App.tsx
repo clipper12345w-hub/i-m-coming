@@ -13,6 +13,7 @@ import Devotional from "./pages/Devotional";
 import PrayerRoom from "./pages/PrayerRoom";
 import BiblePlan from "./pages/BiblePlan";
 import Shop from "./pages/Shop";
+import Services from "./pages/Services";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/bible-plan" element={<BiblePlan />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/services" element={<Services />} />
             <Route path="/xk7m2-altar-9vq" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

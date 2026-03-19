@@ -1,4 +1,4 @@
-const footerLinks = ['Home', 'Devotional', 'Prayer Room', 'Bible Plan', 'Shop'];
+const footerLinks = ['Home', 'Devotional', 'Prayer Room', 'Bible Plan', 'Shop', 'Services'];
 
 export default function Footer() {
   return (

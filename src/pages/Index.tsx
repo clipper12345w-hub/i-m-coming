@@ -7,6 +7,7 @@ import ShopPreview from '@/components/ShopPreview';
 import FreeResources from '@/components/FreeResources';
 import PrayerTeaser from '@/components/PrayerTeaser';
 import FinalCTA from '@/components/FinalCTA';
+import ChurchWebsiteTeaser from '@/components/ChurchWebsiteTeaser';
 import Footer from '@/components/Footer';
 
 const Index = () => {
@@ -20,6 +21,7 @@ const Index = () => {
       <ShopPreview />
       <FreeResources />
       <PrayerTeaser />
+      <ChurchWebsiteTeaser />
       <FinalCTA />
       <Footer />
     </>
