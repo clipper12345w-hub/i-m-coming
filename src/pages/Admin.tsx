@@ -112,6 +112,7 @@ const Admin = () => {
     if (error) {
       setLoginError(error.message);
     } else {
+      setRoleChecked(false);
       setAdminAuthenticated(true);
     }
     setLoginLoading(false);
@@ -140,6 +141,15 @@ const Admin = () => {
   }
 
   // Login form
+  // Show loading while role is being checked after successful login
+  if (adminAuthenticated && user && !roleChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0F0A04" }}>
+        <div className="w-6 h-6 border-2 border-t-[#C9A84C] border-white/10 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   if (!user || !hasRole || !adminAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#0F0A04" }}>
