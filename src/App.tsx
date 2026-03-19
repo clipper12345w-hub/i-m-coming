@@ -13,6 +13,7 @@ import Devotional from "./pages/Devotional";
 import PrayerRoom from "./pages/PrayerRoom";
 import BiblePlan from "./pages/BiblePlan";
 import Shop from "./pages/Shop";
+import Services from "./pages/Services";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
