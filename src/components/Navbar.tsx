@@ -10,6 +10,7 @@ const navLinks = [
   { label: 'PRAYER ROOM', href: '/prayer-room' },
   { label: 'BIBLE PLAN', href: '/bible-plan' },
   { label: 'SHOP', href: '/shop' },
+  { label: 'SERVICES', href: '/services' },
 ];
 
 export default function Navbar() {
