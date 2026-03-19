@@ -112,6 +112,7 @@ const Admin = () => {
     if (error) {
       setLoginError(error.message);
     } else {
+      setRoleChecked(false);
       setAdminAuthenticated(true);
     }
     setLoginLoading(false);
