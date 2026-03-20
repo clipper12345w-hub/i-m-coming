@@ -342,13 +342,40 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Account Settings link */}
-            <div className="mt-6 pt-6 text-center" style={{ borderTop: '1px solid #C9A84C' }}>
+            {/* Account Settings Button */}
+            <div className="mt-6 pt-6 flex justify-center" style={{ borderTop: '1px solid rgba(201,168,76,0.25)' }}>
               <Link
                 to="/settings"
-                className="font-sans text-xs uppercase tracking-widest transition-colors duration-200 hover:text-[#C9A84C]"
-                style={{ color: '#7A6E62' }}
+                className="group inline-flex items-center gap-2.5 px-7 py-3 rounded-xl border font-sans text-xs uppercase tracking-widest transition-all duration-300 hover:shadow-[0_0_24px_rgba(201,168,76,0.18)] active:scale-95"
+                style={{
+                  color: '#7A6E62',
+                  borderColor: 'rgba(201,168,76,0.3)',
+                  background: 'transparent',
+                  letterSpacing: '0.15em',
+                }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.color = '#C9A84C';
+                  el.style.borderColor = '#C9A84C';
+                  el.style.background = 'rgba(201,168,76,0.05)';
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.color = '#7A6E62';
+                  el.style.borderColor = 'rgba(201,168,76,0.3)';
+                  el.style.background = 'transparent';
+                }}
               >
+                <svg
+                  width="14" height="14" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" strokeWidth="1.5"
+                  strokeLinecap="round" strokeLinejoin="round"
+                  className="transition-transform duration-300 group-hover:rotate-90"
+                  style={{ flexShrink: 0 }}
+                >
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
                 Account Settings
               </Link>
             </div>
