@@ -117,16 +117,6 @@ export default function Navbar() {
                     >
                       My Dashboard
                     </Link>
-                    <Link
-                      to="/settings"
-                      onClick={() => setDropdownOpen(false)}
-                      className="block font-sans text-sm px-4 py-2 rounded-lg transition-colors duration-150"
-                      style={{ color: '#1A1209' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = '#FDFAF5'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                    >
-                      Account Settings
-                    </Link>
                   </div>
                 )}
               </div>
