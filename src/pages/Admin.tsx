@@ -47,15 +47,14 @@ const sidebarGroups = [
 
 const allNavItems = sidebarGroups.flatMap((g) => g.items);
 
-// 7 tabs — icon only, no label to fit cleanly
 const bottomTabs = [
-  { key: "dashboard",   label: "Home",    icon: <LayoutDashboard size={22} strokeWidth={1.5} /> },
-  { key: "devotionals", label: "Devo",    icon: <BookOpen        size={22} strokeWidth={1.5} /> },
-  { key: "products",    label: "Shop",    icon: <ShoppingBag     size={22} strokeWidth={1.5} /> },
-  { key: "prayers",     label: "Prayer",  icon: <Heart           size={22} strokeWidth={1.5} /> },
-  { key: "bibleplan",   label: "Bible",   icon: <CalendarDays    size={22} strokeWidth={1.5} /> },
-  { key: "users",       label: "Users",   icon: <Users           size={22} strokeWidth={1.5} /> },
-  { key: "settings",    label: "More",    icon: <Settings        size={22} strokeWidth={1.5} /> },
+  { key: "dashboard",   label: "Home",    icon: <LayoutDashboard size={20} strokeWidth={1.5} /> },
+  { key: "devotionals", label: "Devo",    icon: <BookOpen        size={20} strokeWidth={1.5} /> },
+  { key: "products",    label: "Shop",    icon: <ShoppingBag     size={20} strokeWidth={1.5} /> },
+  { key: "prayers",     label: "Prayer",  icon: <Heart           size={20} strokeWidth={1.5} /> },
+  { key: "bibleplan",   label: "Bible",   icon: <CalendarDays    size={20} strokeWidth={1.5} /> },
+  { key: "users",       label: "Users",   icon: <Users           size={20} strokeWidth={1.5} /> },
+  { key: "settings",    label: "More",    icon: <Settings        size={20} strokeWidth={1.5} /> },
 ];
 
 const Admin = () => {
@@ -67,10 +66,8 @@ const Admin = () => {
   const [loginLoading, setLoginLoading] = useState(false);
   const [roleChecked, setRoleChecked] = useState(false);
   const [hasRole, setHasRole] = useState(false);
-  // Always require fresh login — never use remembered session
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
 
-  // Sign out any existing session on mount to force fresh login
   useEffect(() => {
     const forceLogout = async () => {
       await signOut();
@@ -131,7 +128,6 @@ const Admin = () => {
     }
   };
 
-  // Loading
   if (authLoading || !roleChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#0F0A04" }}>
@@ -140,8 +136,6 @@ const Admin = () => {
     );
   }
 
-  // Login form
-  // Show loading while role is being checked after successful login
   if (adminAuthenticated && user && !roleChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#0F0A04" }}>
@@ -220,12 +214,11 @@ const Admin = () => {
     );
   }
 
-  // Admin panel
   return (
     <div className="min-h-screen flex" style={{ background: "#0F0A04" }}>
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-[260px] border-r h-screen sticky top-0 overflow-y-auto" style={{ background: "#0A0703", borderColor: "rgba(255,255,255,0.08)" }}>
+      {/* Sidebar — visible on md+ (tablet & desktop) */}
+      <aside className="hidden md:flex flex-col md:w-[200px] lg:w-[260px] border-r h-screen sticky top-0 overflow-y-auto" style={{ background: "#0A0703", borderColor: "rgba(255,255,255,0.08)" }}>
         <div className="px-5 py-6 flex items-center gap-3">
           <span className="font-serif text-xl" style={{ color: "#C9A84C" }}>CrossAlliance</span>
           <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded font-medium" style={{ background: "#C9A84C", color: "#0F0A04", fontFamily: "Lato, sans-serif" }}>Admin</span>
@@ -280,27 +273,26 @@ const Admin = () => {
         </div>
       </aside>
 
-      {/* Mobile Bottom Tab Bar — icon only, 7 tabs */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.08]" style={{ background: "#0A0703" }}>
-        <div className="flex items-stretch h-14">
+      {/* Mobile Bottom Tab Bar — visible only below md */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50" style={{ background: "#0A0703", borderTop: "1px solid rgba(201,168,76,0.2)" }}>
+        <div className="flex items-stretch" style={{ minHeight: "56px" }}>
           {bottomTabs.map((item) => (
             <button
               key={item.key}
               onClick={() => setActiveSection(item.key)}
               className="flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors"
-              style={{ color: activeSection === item.key ? "#C9A84C" : "#4A4035" }}
+              style={{ color: activeSection === item.key ? "#C9A84C" : "#8A7A6A" }}
             >
               {item.icon}
               <span className="text-[9px] font-medium leading-none" style={{ fontFamily: "Lato, sans-serif" }}>{item.label}</span>
             </button>
           ))}
         </div>
-        {/* Back to Site — di bawah tab bar, hanya mobile */}
-        <div className="border-t border-white/[0.04] px-4 py-2 flex justify-center">
+        <div className="px-4 py-2 flex justify-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <Link
             to="/"
             className="flex items-center gap-1.5 text-[10px] hover:opacity-80 transition-opacity"
-            style={{ color: "#4A4035", fontFamily: "Lato, sans-serif" }}
+            style={{ color: "#8A7A6A", fontFamily: "Lato, sans-serif" }}
           >
             <ArrowLeft size={12} strokeWidth={1.5} />
             Back to Site

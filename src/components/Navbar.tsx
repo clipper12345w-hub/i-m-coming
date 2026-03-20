@@ -117,16 +117,6 @@ export default function Navbar() {
                     >
                       My Dashboard
                     </Link>
-                    <Link
-                      to="/settings"
-                      onClick={() => setDropdownOpen(false)}
-                      className="block font-sans text-sm px-4 py-2 rounded-lg transition-colors duration-150"
-                      style={{ color: '#1A1209' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = '#FDFAF5'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                    >
-                      Account Settings
-                    </Link>
                   </div>
                 )}
               </div>
@@ -189,14 +179,9 @@ export default function Navbar() {
               </motion.a>
             ))}
             {user ? (
-              <>
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.4 }}>
-                  <Link to="/dashboard" className="font-serif text-3xl text-ink mb-6 hover:text-gold transition-colors block" onClick={() => setMobileOpen(false)}>Dashboard</Link>
-                </motion.div>
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.4 }}>
-                  <Link to="/settings" className="font-serif text-3xl text-ink mb-6 hover:text-gold transition-colors block" onClick={() => setMobileOpen(false)}>Settings</Link>
-                </motion.div>
-              </>
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.4 }}>
+                <Link to="/dashboard" className="font-serif text-3xl text-ink mb-6 hover:text-gold transition-colors block" onClick={() => setMobileOpen(false)}>Dashboard</Link>
+              </motion.div>
             ) : (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.4 }}>
                 <Link to="/login" className="font-serif text-3xl text-gold mb-6 block" onClick={() => setMobileOpen(false)}>Sign In</Link>
