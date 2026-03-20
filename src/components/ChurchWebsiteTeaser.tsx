@@ -22,7 +22,6 @@ export default function ChurchWebsiteTeaser() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
           className="inline-block font-sans text-xs uppercase tracking-[0.25em] text-gold mb-6">
-          
           Our Services
         </motion.span>
 
@@ -30,9 +29,8 @@ export default function ChurchWebsiteTeaser() {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold text-parchment mb-6 leading-tight">Website For
-Your Church
-          <br />Gereja Anda
+          className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold text-parchment mb-6 leading-tight">
+          A Website For<br />Your Church
         </motion.h2>
 
         <motion.p
@@ -40,7 +38,6 @@ Your Church
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.2 }}
           className="font-sans text-base md:text-lg text-muted-warm max-w-xl mx-auto mb-10 leading-relaxed">
-          
           We help churches build a meaningful digital presence — from responsive design to online service scheduling and donation features.
         </motion.p>
 
@@ -48,12 +45,10 @@ Your Church
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.35 }}>
-          
           <Link
             to="/services"
             className="inline-flex items-center gap-2 font-sans text-xs uppercase tracking-[0.2em] px-8 py-3.5 border border-gold text-gold hover:bg-gold hover:text-parchment transition-all duration-300">
-            
-            Lihat Layanan
+            View Services
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M3 8H13M10 5L13 8L10 11" stroke="currentColor" strokeWidth="1.5" />
             </svg>
@@ -63,6 +58,6 @@ Your Church
 
       {/* Bottom gradient line */}
       <div className="absolute bottom-0 left-0 right-0 h-px opacity-30" style={{ background: 'linear-gradient(90deg, transparent, hsl(var(--gold)), transparent)' }} />
-    </section>);
-
+    </section>
+  );
 }

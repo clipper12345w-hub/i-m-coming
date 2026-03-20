@@ -14,7 +14,7 @@ function getPlanDay() {
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<{ full_name: string | null }>({ full_name: null });
+  const [profile, setProfile] = useState<{ full_name: string | null; avatar_url: string | null }>({ full_name: null, avatar_url: null });
   const [loading, setLoading] = useState(true);
   const [completedDays, setCompletedDays] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -22,20 +22,22 @@ export default function Dashboard() {
   const [devotionalsRead, setDevotionalsRead] = useState(0);
   const [todayPlan, setTodayPlan] = useState<{ old_testament: string | null; new_testament: string | null; psalm: string | null } | null>(null);
   const [savedDevotionals, setSavedDevotionals] = useState<{ title: string; published_date: string }[]>([]);
+  const [recentPrayers, setRecentPrayers] = useState<{ id: string; content: string; created_at: string }[]>([]);
 
   const planDay = getPlanDay();
 
   useEffect(() => {
     if (!user) return;
     const fetchAll = async () => {
-      const [profileRes, progressRes, streakRes, prayerRes, devReadRes, planRes, savedRes] = await Promise.all([
-        supabase.from('profiles').select('full_name').eq('id', user.id).single(),
+      const [profileRes, progressRes, streakRes, prayerRes, devReadRes, planRes, savedRes, recentPrayersRes] = await Promise.all([
+        supabase.from('profiles').select('full_name, avatar_url').eq('id', user.id).single(),
         supabase.from('bible_plan_progress').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('bible_plan_progress').select('completed_at').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(365),
         supabase.from('prayer_requests').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
         supabase.from('devotional_reactions').select('devotional_id', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('bible_plan').select('old_testament, new_testament, psalm').eq('day_number', planDay).maybeSingle(),
         supabase.from('saved_devotionals').select('devotional_id, created_at, devotionals(title, published_date)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3),
+        supabase.from('prayer_requests').select('id, content, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(3),
       ]);
 
       if (profileRes.data) setProfile(profileRes.data);
@@ -43,6 +45,7 @@ export default function Dashboard() {
       setPrayerCount(prayerRes.count ?? 0);
       setDevotionalsRead(devReadRes.count ?? 0);
       setTodayPlan(planRes.data);
+      setRecentPrayers(recentPrayersRes.data || []);
 
       if (streakRes.data && streakRes.data.length > 0) {
         let s = 0;
@@ -77,241 +80,281 @@ export default function Dashboard() {
     return 'Good evening';
   })();
 
-  const stats = [
-    {
-      label: 'Bible Plan',
-      value: `Day ${completedDays}`,
-      sub: `of 365 days`,
-      progress: completedDays / 365,
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M4 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
-          <path d="M11 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
-        </svg>
-      ),
-    },
-    {
-      label: 'Reading Streak',
-      value: `${streak}`,
-      sub: streak > 0 ? 'days straight' : 'Start today!',
-      progress: null,
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8Z" />
-        </svg>
-      ),
-    },
-    {
-      label: 'Prayers',
-      value: String(prayerCount),
-      sub: 'this month',
-      progress: null,
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M12 3C10 3 7 5 7 9c0 3 2 5 3 6l2 2 2-2c1-1 3-3 3-6 0-4-3-6-5-6z" />
-          <path d="M8 17l-3 4M16 17l3 4" />
-        </svg>
-      ),
-    },
-    {
-      label: 'Devotionals',
-      value: String(devotionalsRead),
-      sub: 'read total',
-      progress: null,
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-        </svg>
-      ),
-    },
-  ];
+  const readings = [
+    { category: 'OLD TESTAMENT', passage: todayPlan?.old_testament },
+    { category: 'NEW TESTAMENT', passage: todayPlan?.new_testament },
+    { category: 'PSALMS', passage: todayPlan?.psalm },
+  ].filter(r => r.passage);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ background: '#FDFAF5' }}>
       <Navbar />
 
       {/* HEADER */}
-      <section className="pt-28 pb-14 relative overflow-hidden" style={{ background: 'hsl(var(--dark))' }}>
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `radial-gradient(circle at 20% 50%, hsl(var(--gold) / 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, hsl(var(--gold) / 0.15) 0%, transparent 40%)`
-        }} />
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 relative">
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.7 }}>
-            <p className="font-sans text-xs uppercase tracking-[0.2em] text-muted-foreground mb-1">{greeting}</p>
-            <h1 className="font-serif font-light text-4xl sm:text-5xl text-white">
-              {profile.full_name || 'Friend'}
-            </h1>
-            <div className="flex items-center gap-4 mt-4">
-              <Link to="/bible-plan" className="font-sans text-xs uppercase tracking-[0.2em] px-5 py-2.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
-                Continue Reading
-              </Link>
-              <Link to="/prayer-room" className="font-sans text-xs uppercase tracking-[0.2em] px-5 py-2.5 rounded-lg border border-white/20 text-white/80 hover:border-primary hover:text-primary transition-colors">
-                Prayer Room
-              </Link>
+      <section className="pt-24 pb-12 md:pt-28 md:pb-14" style={{ background: '#0F0A04' }}>
+        <div className="max-w-6xl mx-auto px-6 sm:px-8">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.7 }}
+            className="flex items-center justify-between"
+          >
+            <div>
+              <p className="font-sans text-sm" style={{ color: '#7A6E62' }}>{greeting}</p>
+              <h1 className="font-serif font-light text-4xl sm:text-5xl mt-1" style={{ color: '#FDFAF5' }}>
+                {profile.full_name || 'Friend'}
+              </h1>
+              <p className="font-sans text-sm mt-2" style={{ color: '#4A4035' }}>Welcome back to CrossAlliance.</p>
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* STATS */}
-      <section className="max-w-6xl mx-auto px-6 sm:px-8 -mt-6 relative z-10">
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="border-t-primary rounded-full w-6 h-6 animate-spin border-2 border-transparent" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {stats.map((s, i) => (
-              <motion.div
-                key={i}
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                className="bg-card rounded-2xl p-5 sm:p-6 border border-border relative overflow-hidden group hover:shadow-lg transition-shadow duration-300"
-              >
-                <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'linear-gradient(to right, transparent, hsl(var(--gold)), transparent)' }} />
-                <div className="flex items-start justify-between mb-3">
-                  <span className="text-xs uppercase tracking-[0.15em] font-sans text-muted-foreground">{s.label}</span>
-                  <span className="text-primary opacity-50 group-hover:opacity-100 transition-opacity">{s.icon}</span>
+            <div className="hidden sm:block">
+              {profile.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-[#C9A84C]" />
+              ) : (
+                <div className="w-12 h-12 rounded-full border-2 border-[#C9A84C] flex items-center justify-center" style={{ background: '#1A1209' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A6E62" strokeWidth="1.5">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 4-7 8-7s8 3 8 7" />
+                  </svg>
                 </div>
-                <span className="block font-serif text-3xl sm:text-4xl text-primary">{s.value}</span>
-                <span className="block font-sans text-xs mt-1 text-muted-foreground">{s.sub}</span>
-                {s.progress !== null && (
-                  <div className="mt-3 h-1.5 rounded-full bg-secondary">
-                    <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${Math.min(s.progress * 100, 100)}%` }} />
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* CONTENT CARDS */}
-      <section className="max-w-6xl mx-auto px-6 sm:px-8 py-10 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Today's Bible Plan */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="bg-card rounded-2xl p-6 sm:p-8 border border-border relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.04]" style={{
-              background: `radial-gradient(circle, hsl(var(--gold)) 0%, transparent 70%)`
-            }} />
-            <div className="flex items-center justify-between mb-4">
-              <span className="font-sans text-xs uppercase tracking-[0.2em] text-primary">Today's Reading</span>
-              <span className="font-serif text-2xl text-primary">Day {planDay}</span>
+              )}
             </div>
-            {todayPlan ? (
-              <div className="space-y-2 mb-6">
-                {todayPlan.old_testament && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                    <p className="font-sans text-sm text-muted-foreground">{todayPlan.old_testament}</p>
-                  </div>
-                )}
-                {todayPlan.new_testament && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                    <p className="font-sans text-sm text-muted-foreground">{todayPlan.new_testament}</p>
-                  </div>
-                )}
-                {todayPlan.psalm && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                    <p className="font-sans text-sm text-muted-foreground">{todayPlan.psalm}</p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="font-sans text-sm mb-6 text-muted-foreground">No reading data for today.</p>
-            )}
-            <Link to="/bible-plan" className="font-sans text-xs uppercase tracking-[0.2em] text-primary hover:opacity-80 transition-opacity">
-              Open Bible Plan →
-            </Link>
-          </motion.div>
-
-          {/* Saved Devotionals */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className="bg-card rounded-2xl p-6 sm:p-8 border border-border"
-          >
-            <span className="block font-sans text-xs uppercase tracking-[0.2em] mb-5 text-primary">Saved Devotionals</span>
-            {savedDevotionals.length > 0 ? (
-              <div className="space-y-4 mb-6">
-                {savedDevotionals.map((d, i) => (
-                  <div key={i} className="flex items-start gap-3 group">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--gold))" strokeWidth="1.5">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <span className="block font-serif text-base text-foreground group-hover:text-primary transition-colors">{d.title}</span>
-                      <span className="block font-sans text-xs text-muted-foreground">
-                        {d.published_date ? new Date(d.published_date + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="font-sans text-sm text-muted-foreground mb-6">No saved devotionals yet.</p>
-            )}
-            <Link to="/devotional" className="font-sans text-xs uppercase tracking-[0.2em] text-primary hover:opacity-80 transition-opacity">
-              Browse Devotionals →
-            </Link>
           </motion.div>
         </div>
-
-        {/* Quick Links */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3"
-        >
-          {[
-            { label: 'Bible Plan', href: '/bible-plan', icon: (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M4 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
-                <path d="M11 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
-              </svg>
-            )},
-            { label: 'Prayer Room', href: '/prayer-room', icon: (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M12 3C10 3 7 5 7 9c0 3 2 5 3 6l2 2 2-2c1-1 3-3 3-6 0-4-3-6-5-6z" />
-                <path d="M8 17l-3 4M16 17l3 4" />
-              </svg>
-            )},
-            { label: 'Devotional', href: '/devotional', icon: (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-              </svg>
-            )},
-            { label: 'Shop', href: '/shop', icon: (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M6 2h12l3 5H3l3-5z" />
-                <rect x="3" y="7" width="18" height="14" rx="1" />
-                <path d="M9 7v4a3 3 0 006 0V7" />
-              </svg>
-            )},
-          ].map((link) => (
-            <Link
-              key={link.label}
-              to={link.href}
-              className="bg-card rounded-xl p-5 border border-border hover:border-primary/30 hover:shadow-md transition-all duration-200 text-center group"
-            >
-              <span className="block mb-3 text-primary/60 group-hover:text-primary transition-colors flex justify-center">{link.icon}</span>
-              <span className="font-sans text-xs uppercase tracking-[0.15em] text-muted-foreground group-hover:text-primary transition-colors">{link.label}</span>
-            </Link>
-          ))}
-        </motion.div>
       </section>
+
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <div className="w-6 h-6 border-2 border-t-[#C9A84C] border-[#EDE8DC] rounded-full animate-spin" />
+        </div>
+      ) : (
+        <>
+          {/* STATS ROW */}
+          <section className="max-w-6xl mx-auto px-6 sm:px-8 py-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                {
+                  label: 'BIBLE PLAN',
+                  value: `Day ${completedDays}`,
+                  sub: 'of 365 days',
+                  progress: completedDays / 365,
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.5">
+                      <path d="M4 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
+                      <path d="M11 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: 'READING STREAK',
+                  value: `${streak} Days`,
+                  sub: streak > 0 ? 'Keep it up!' : 'Start today!',
+                  progress: null,
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.5">
+                      <path d="M12 2c0 4-4 6-4 10a4 4 0 008 0c0-4-4-6-4-10z" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: 'PRAYERS LIFTED',
+                  value: String(prayerCount),
+                  sub: 'this month',
+                  progress: null,
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.5">
+                      <path d="M12 3C10 3 7 5 7 9c0 3 2 5 3 6l2 2 2-2c1-1 3-3 3-6 0-4-3-6-5-6z" />
+                      <path d="M8 17l-3 4M16 17l3 4" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: 'DEVOTIONALS READ',
+                  value: String(devotionalsRead),
+                  sub: 'total',
+                  progress: null,
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.5">
+                      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                    </svg>
+                  ),
+                },
+              ].map((s, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  className="bg-white rounded-2xl p-5 border border-[#EDE8DC] relative overflow-hidden group hover:shadow-md hover:border-[#C9A84C] transition-all duration-200"
+                >
+                  <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(to right, transparent, #C9A84C, transparent)' }} />
+                  <span className="absolute top-4 right-4 opacity-30">{s.icon}</span>
+                  <span className="block font-sans text-[10px] uppercase tracking-widest" style={{ color: '#7A6E62' }}>{s.label}</span>
+                  <span className="block font-serif text-3xl mt-1" style={{ color: '#C9A84C' }}>{s.value}</span>
+                  <span className="block font-sans text-xs mt-1" style={{ color: '#7A6E62' }}>{s.sub}</span>
+                  {s.progress !== null && (
+                    <div className="mt-3 h-1 rounded-full" style={{ background: '#EDE8DC' }}>
+                      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(s.progress * 100, 100)}%`, background: '#C9A84C' }} />
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </section>
+
+          {/* MAIN CONTENT */}
+          <section className="max-w-6xl mx-auto px-6 sm:px-8 pb-16">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* LEFT COLUMN */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Today's Bible Plan */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  className="bg-white rounded-2xl p-6 border border-[#EDE8DC]"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-sans text-xs uppercase tracking-[0.2em]" style={{ color: '#C9A84C' }}>Today's Reading</span>
+                    <span className="font-serif text-xl" style={{ color: '#C9A84C' }}>Day {planDay}</span>
+                  </div>
+                  {readings.length > 0 ? (
+                    <div>
+                      {readings.map((r, i) => (
+                        <div key={i} className={`flex items-center gap-3 py-3 ${i < readings.length - 1 ? 'border-b border-[#EDE8DC]' : ''}`}>
+                          <span className="font-sans text-[10px] uppercase tracking-widest px-3 py-1 rounded-full border border-[#EDE8DC] shrink-0" style={{ color: '#7A6E62', background: '#FDFAF5' }}>
+                            {r.category}
+                          </span>
+                          <span className="font-serif text-lg flex-1" style={{ color: '#1A1209' }}>{r.passage}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="font-sans text-sm italic" style={{ color: '#7A6E62' }}>No reading data for today.</p>
+                  )}
+                  <Link to="/bible-plan" className="inline-block font-sans text-xs uppercase tracking-widest mt-4 hover:underline" style={{ color: '#C9A84C' }}>
+                    View Full Bible Plan →
+                  </Link>
+                </motion.div>
+
+                {/* Recent Prayer Activity */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 0.5 }}
+                  className="bg-white rounded-2xl p-6 border border-[#EDE8DC]"
+                >
+                  <span className="block font-sans text-xs uppercase tracking-[0.2em] mb-4" style={{ color: '#C9A84C' }}>My Prayers</span>
+                  {recentPrayers.length > 0 ? (
+                    <div>
+                      {recentPrayers.map((p, i) => (
+                        <div key={p.id} className={`py-2 ${i < recentPrayers.length - 1 ? 'border-b border-[#EDE8DC]' : ''}`}>
+                          <p className="font-sans text-sm line-clamp-2" style={{ color: '#7A6E62' }}>{p.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="font-sans text-sm italic" style={{ color: '#7A6E62' }}>You haven't lifted any prayers yet.</p>
+                  )}
+                  <Link to="/prayer-room" className="inline-block font-sans text-xs uppercase tracking-widest mt-4 hover:underline" style={{ color: '#C9A84C' }}>
+                    Go to Prayer Room →
+                  </Link>
+                </motion.div>
+              </div>
+
+              {/* RIGHT COLUMN */}
+              <div className="space-y-6">
+                {/* Quick Actions */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.45, duration: 0.5 }}
+                  className="bg-white rounded-2xl p-6 border border-[#EDE8DC]"
+                >
+                  <span className="block font-sans text-xs uppercase tracking-[0.2em] mb-4" style={{ color: '#C9A84C' }}>Quick Actions</span>
+                  <div className="flex flex-col gap-2">
+                    {[
+                      { label: "Read Today's Devotional", href: '/devotional', icon: (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.5">
+                          <path d="M4 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
+                          <path d="M11 4c0-1 1-2 3-2s4 1 4 2v16c-1-1-3-2-4-2s-2 0-3 1V4z" />
+                        </svg>
+                      )},
+                      { label: 'Lift a Prayer', href: '/prayer-room', icon: (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.5">
+                          <path d="M12 3C10 3 7 5 7 9c0 3 2 5 3 6l2 2 2-2c1-1 3-3 3-6 0-4-3-6-5-6z" />
+                          <path d="M8 17l-3 4M16 17l3 4" />
+                        </svg>
+                      )},
+                      { label: 'Bible Plan', href: '/bible-plan', icon: (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.5">
+                          <rect x="3" y="4" width="18" height="18" rx="2" />
+                          <path d="M3 10h18M8 2v4M16 2v4" />
+                        </svg>
+                      )},
+                      { label: 'Browse Shop', href: '/shop', icon: (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.5">
+                          <path d="M6 2h12l3 5H3l3-5z" />
+                          <rect x="3" y="7" width="18" height="14" rx="1" />
+                          <path d="M9 7v4a3 3 0 006 0V7" />
+                        </svg>
+                      )},
+                    ].map((action) => (
+                      <Link
+                        key={action.label}
+                        to={action.href}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[#EDE8DC] font-sans text-sm hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all duration-200"
+                        style={{ color: '#1A1209' }}
+                      >
+                        {action.icon}
+                        {action.label}
+                      </Link>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Saved Devotionals */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.55, duration: 0.5 }}
+                  className="bg-white rounded-2xl p-6 border border-[#EDE8DC]"
+                >
+                  <span className="block font-sans text-xs uppercase tracking-[0.2em] mb-4" style={{ color: '#C9A84C' }}>Saved Devotionals</span>
+                  {savedDevotionals.length > 0 ? (
+                    <div className="space-y-3">
+                      {savedDevotionals.map((d, i) => (
+                        <div key={i}>
+                          <span className="block font-serif text-base font-medium" style={{ color: '#1A1209' }}>{d.title}</span>
+                          <span className="block font-sans text-xs" style={{ color: '#7A6E62' }}>
+                            {d.published_date ? new Date(d.published_date + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                          </span>
+                          <Link to="/devotional" className="font-sans text-xs hover:underline" style={{ color: '#C9A84C' }}>Read →</Link>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="font-sans text-sm italic" style={{ color: '#7A6E62' }}>No saved devotionals yet.</p>
+                  )}
+                  <Link to="/devotional" className="inline-block font-sans text-xs uppercase tracking-widest mt-4 hover:underline" style={{ color: '#C9A84C' }}>
+                    View All →
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Account Settings link */}
+            <div className="mt-6 pt-6 text-center" style={{ borderTop: '1px solid #C9A84C' }}>
+              <Link
+                to="/settings"
+                className="font-sans text-xs uppercase tracking-widest transition-colors duration-200 hover:text-[#C9A84C]"
+                style={{ color: '#7A6E62' }}
+              >
+                Account Settings
+              </Link>
+            </div>
+          </section>
+        </>
+      )}
 
       <Footer />
     </div>
